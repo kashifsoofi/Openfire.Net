@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{038A47B0-0429-4AD1-A389-1C70DF2C2C0E}</ProjectGuid>
+    <ProjectGuid>{3E9BDA22-604B-4F18-AE15-2718695BDF78}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>org.xmpp</RootNamespace>
-    <AssemblyName>Tinder</AssemblyName>
+    <AssemblyName>Tinder.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -29,51 +29,45 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="NLog">
-      <HintPath>..\packages\NLog.3.2.1\lib\net45\NLog.dll</HintPath>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Util\XMPPConstants.cs" />
-    <Compile Include="Util\ValueWrapper.cs" />
-    <Compile Include="Component\AbstractComponent.cs" />
-    <Compile Include="ResultManagement\Result.cs" />
-    <Compile Include="ResultManagement\ResultSet.cs" />
-    <Compile Include="ResultManagement\ResultSetImpl.cs" />
-    <Compile Include="Component\Component.cs" />
-    <Compile Include="Component\ComponentException.cs" />
-    <Compile Include="Component\ComponentManager.cs" />
-    <Compile Include="Component\ComponentManagerFactory.cs" />
-    <Compile Include="Component\IQResultListener.cs" />
-    <Compile Include="Forms\FormField.cs" />
-    <Compile Include="Forms\DataForm.cs" />
-    <Compile Include="Muc\DestroyRoom.cs" />
-    <Compile Include="Muc\Invitation.cs" />
-    <Compile Include="Muc\JoinRoom.cs" />
-    <Compile Include="Muc\LeaveRoom.cs" />
-    <Compile Include="Muc\RoomConfiguration.cs" />
-    <Compile Include="Packet\StreamError.cs" />
-    <Compile Include="Packet\IQ.cs" />
-    <Compile Include="Packet\JID.cs" />
-    <Compile Include="Packet\Message.cs" />
-    <Compile Include="Packet\Packet.cs" />
-    <Compile Include="Packet\PacketExtension.cs" />
-    <Compile Include="Packet\Presence.cs" />
-    <Compile Include="Packet\Roster.cs" />
-    <Compile Include="Packet\PacketError.cs" />
+    <Compile Include="Component\AbstractComponentIsConsumerTest.cs" />
+    <Compile Include="Component\AbstractComponentRespondsToIQRequestsTest.cs" />
+    <Compile Include="Component\AbstractComponentServiceDiscovery.cs" />
+    <Compile Include="Component\AbstractComponentTest.cs" />
+    <Compile Include="Component\DummyAbstractComponent.cs" />
+    <Compile Include="Component\SlowRespondingThreadNameComponent.cs" />
+    <Compile Include="Component\ThrowExceptionOnGetComponent.cs" />
+    <Compile Include="Forms\DataFormAddingFieldsTest.cs" />
+    <Compile Include="Forms\FormFieldGetSetTest.cs" />
+    <Compile Include="Packet\DomainPrepTest.cs" />
+    <Compile Include="Packet\JIDCachedBareAndFullJIDTest.cs" />
+    <Compile Include="Packet\JIDCreationDomainTest.cs" />
+    <Compile Include="Packet\JIDCreationNodeTest.cs" />
+    <Compile Include="Packet\JIDCreationResourceTest.cs" />
+    <Compile Include="Packet\JIDEqualsHashCodeTest.cs" />
+    <Compile Include="Packet\JIDNodeEscapingTest.cs" />
+    <Compile Include="Packet\JIDSerializabilityTest.cs" />
+    <Compile Include="Packet\NodePrepTest.cs" />
+    <Compile Include="Packet\PacketAddressingTest.cs" />
+    <Compile Include="Packet\PacketErrorApplicationConditionTest.cs" />
+    <Compile Include="Packet\ResourcePrepTest.cs" />
+    <Compile Include="Packet\StringPrepCacheTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="Component\" />
-    <Folder Include="Forms\" />
-    <Folder Include="Muc\" />
-    <Folder Include="Packet\" />
-    <Folder Include="ResultManagement\" />
-    <Folder Include="Util\" />
+    <None Include="packages.config" />
+    <None Include="jid-version-tinder1.1.serialized">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Folder Include="Component\" />
+    <Folder Include="Forms\" />
+    <Folder Include="Packet\" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -84,4 +78,10 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <ProjectReference Include="..\Tinder\Tinder.csproj">
+      <Project>{038A47B0-0429-4AD1-A389-1C70DF2C2C0E}</Project>
+      <Name>Tinder</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
