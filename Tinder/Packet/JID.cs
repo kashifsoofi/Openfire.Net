@@ -1,4 +1,5 @@
-﻿// Copyright (C) 2004-2009 Jive Software. All rights reserved.
+﻿using org.xmpp.util;
+// Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Text;
 
 namespace org.xmpp.packet
 {
@@ -43,18 +45,18 @@ namespace org.xmpp.packet
  */
 	public class JID : IComparable
 	{
-		private static final long serialVersionUID = 8135170608402192877L;
+		private static readonly long serialVersionUID = 8135170608402192877L;
 
 		// Stringprep operations are very expensive. Therefore, we cache node, domain and
 		// resource values that have already had stringprep applied so that we can check
 		// incoming values against the cache.
-		private static final ConcurrentMap<String, ValueWrapper<String>> NODEPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(10000).build();
-		private static final ConcurrentMap<String, ValueWrapper<String>> DOMAINPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(500).build();
-		private static final ConcurrentMap<String, ValueWrapper<String>> RESOURCEPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(10000).build();
+		private static readonly ConcurrentMap<String, ValueWrapper<String>> NODEPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(10000).build();
+		private static readonly ConcurrentMap<String, ValueWrapper<String>> DOMAINPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(500).build();
+		private static readonly ConcurrentMap<String, ValueWrapper<String>> RESOURCEPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(10000).build();
 
-		private final String node;
-		private final String domain;
-		private final String resource;
+		private readonly string node;
+		private readonly string domain;
+		private readonly string resource;
 
 		/**
      * Escapes the node portion of a JID according to "JID Escaping" (XEP-0106).
@@ -88,46 +90,47 @@ namespace org.xmpp.packet
      * @return the escaped version of the node.
      * @see <a href="http://xmpp.org/extensions/xep-0106.html">XEP-0106: JID Escaping</a>
      */
-		public static String escapeNode(String node) {
+		public static string escapeNode(string node) {
 			if (node == null) {
 				return null;
 			}
-			final StringBuilder buf = new StringBuilder(node.length() + 8);
-			for (int i=0, n=node.length(); i<n; i++) {
-				final char c = node.charAt(i);
+			StringBuilder buf = new StringBuilder(node.Length + 8);
+			for (int i=0, n=node.Length; i<n; i++) {
+				char c = node[i];
 				switch (c) {
-					case '"': buf.append("\\22"); break;
-					case '&': buf.append("\\26"); break;
-					case '\'': buf.append("\\27"); break;
-					case '/': buf.append("\\2f"); break;
-					case ':': buf.append("\\3a"); break;
-					case '<': buf.append("\\3c"); break;
-					case '>': buf.append("\\3e"); break;
-					case '@': buf.append("\\40"); break;
+					case '"': buf.Append("\\22"); break;
+					case '&': buf.Append("\\26"); break;
+					case '\'': buf.Append("\\27"); break;
+					case '/': buf.Append("\\2f"); break;
+					case ':': buf.Append("\\3a"); break;
+					case '<': buf.Append("\\3c"); break;
+					case '>': buf.Append("\\3e"); break;
+					case '@': buf.Append("\\40"); break;
 					case '\\':
-						final int c2 = (i+1 < n) ? node.charAt(i+1) : -1;
-						final int c3 = (i+2 < n) ? node.charAt(i+2) : -1;
+						int c2 = (i+1 < n) ? node[i+1] : -1;
+						int c3 = (i+2 < n) ? node[i+2] : -1;
 						if ((c2 == '2' && (c3 == '0' || c3 == '2' || c3 == '6' || c3 == '7' || c3 == 'f')) ||
 						(c2 == '3' && (c3 == 'a' || c3 == 'c' || c3 == 'e')) ||
 						(c2 == '4' && c3 == '0') ||
 						(c2 == '5' && c3 == 'c')) {
-							buf.append("\\5c");
+							buf.Append("\\5c");
 						}
 						else {
-							buf.append(c);
+							buf.Append(c);
 						}
 						break;
 					default: {
-							if (Character.isWhitespace(c)) {
-								buf.append("\\20");
+							if (Char.IsWhiteSpace(c)) {
+								buf.Append("\\20");
 							}
 							else {
-								buf.append(c);
+								buf.Append(c);
 							}
-						}
+                    }
+                        break;
 				}
 			}
-			return buf.toString();
+			return buf.ToString();
 		}
 
 		/**
@@ -162,53 +165,53 @@ namespace org.xmpp.packet
      * @return the un-escaped version of the node.
      * @see <a href="http://xmpp.org/extensions/xep-0106.html">XEP-0106: JID Escaping</a>
      */
-		public static String unescapeNode(String node) {
+		public static string unescapeNode(string node) {
 			if (node == null) {
 				return null;
 			}
-			char [] nodeChars = node.toCharArray();
-			StringBuilder buf = new StringBuilder(nodeChars.length);
-			for (int i=0, n=nodeChars.length; i<n; i++) {
+			char [] nodeChars = node.ToCharArray();
+			StringBuilder buf = new StringBuilder(nodeChars.Length);
+			for (int i=0, n=nodeChars.Length; i<n; i++) {
 				compare: {
-					char c = node.charAt(i);
+					char c = node[i];
 					if (c == '\\' && i+2<n) {
 						char c2 = nodeChars[i+1];
 						char c3 = nodeChars[i+2];
 						if (c2 == '2') {
 							switch (c3) {
-								case '0': buf.append(' '); i+=2; break compare;
-								case '2': buf.append('"'); i+=2; break compare;
-								case '6': buf.append('&'); i+=2; break compare;
-								case '7': buf.append('\''); i+=2; break compare;
-								case 'f': buf.append('/'); i+=2; break compare;
+								case '0': buf.Append(' '); i+=2; goto compare;
+								case '2': buf.Append('"'); i+=2; goto compare;
+								case '6': buf.Append('&'); i+=2; goto compare;
+								case '7': buf.Append('\''); i+=2; goto compare;
+								case 'f': buf.Append('/'); i+=2; goto compare;
 							}
 						}
 						else if (c2 == '3') {
 							switch (c3) {
-								case 'a': buf.append(':'); i+=2; break compare;
-								case 'c': buf.append('<'); i+=2; break compare;
-								case 'e': buf.append('>'); i+=2; break compare;
+								case 'a': buf.Append(':'); i+=2; goto compare;
+								case 'c': buf.Append('<'); i+=2; goto compare;
+								case 'e': buf.Append('>'); i+=2; goto compare;
 							}
 						}
 						else if (c2 == '4') {
 							if (c3 == '0') {
-								buf.append("@");
+								buf.Append("@");
 								i+=2;
-								break compare;
+								goto compare;
 							}
 						}
 						else if (c2 == '5') {
 							if (c3 == 'c') {
-								buf.append("\\");
+								buf.Append("\\");
 								i+=2;
-								break compare;
+								goto compare;
 							}
 						}
 					}
-					buf.append(c);
+					buf.Append(c);
 				}
 			}
-			return buf.toString();
+			return buf.ToString();
 		}
 
 		/**
@@ -226,14 +229,14 @@ namespace org.xmpp.packet
 	 * @throws IllegalArgumentException
 	 *             if <tt>node</tt> is not a valid JID node.
 	 */
-		public static String nodeprep(String node) {
+		public static string nodeprep(string node) {
 			if (node == null) {
 				return null;
 			}
 
-			final ValueWrapper<String> cachedResult = NODEPREP_CACHE.get(node);
+			ValueWrapper<String> cachedResult = NODEPREP_CACHE.get(node);
 
-			final String answer;
+			string answer;
 			if (cachedResult == null) {
 				try {
 					answer = Stringprep.nodeprep(node);
@@ -303,15 +306,16 @@ namespace org.xmpp.packet
 	 * @throws IllegalArgumentException
 	 *             if <tt>domain</tt> is not a valid JID domain part.
 	 */
-		public static String domainprep(String domain) throws StringprepException {
+		public static string domainprep(string domain)
+        {
 			if (domain == null) {
 				throw new IllegalArgumentException(
 					"Argument 'domain' cannot be null.");
 			}
 
-			final ValueWrapper<String> cachedResult = DOMAINPREP_CACHE.get(domain);
+			ValueWrapper<String> cachedResult = DOMAINPREP_CACHE.get(domain);
 
-			final String answer;
+			string answer;
 			if (cachedResult == null) {
 				try {
 					answer = Stringprep.nameprep(IDNA.toASCII(domain), false);
@@ -382,16 +386,16 @@ namespace org.xmpp.packet
 	 * @throws IllegalArgumentException
 	 *             if <tt>resource</tt> is not a valid JID resource.
 	 */
-		public static String resourceprep(String resource)
-		throws StringprepException {
+		public static string resourceprep(string resource)
+        {
 			if (resource == null) {
 				return null;
 			}
 
-			final ValueWrapper<String> cachedResult = RESOURCEPREP_CACHE
+			ValueWrapper<string> cachedResult = RESOURCEPREP_CACHE
 				.get(resource);
 
-			final String answer;
+			string answer;
 			if (cachedResult == null) {
 				try {
 					answer = Stringprep.resourceprep(resource);
@@ -455,9 +459,9 @@ namespace org.xmpp.packet
      * @param jid a valid JID.
      * @throws IllegalArgumentException if the JID is not valid.
      */
-		public JID(String jid) {
-			this(getParts(jid), false);
-		}
+		public JID(string jid)
+            : this(getParts(jid), false)
+        { }
 
 		/**
 	 * Constructs a JID from it's String representation. This construction
@@ -470,13 +474,13 @@ namespace org.xmpp.packet
 	 * @throws IllegalArgumentException
 	 *             if the JID is not valid.
 	 */
-		public JID(String jid, boolean skipStringPrep) {
-			this(getParts(jid), skipStringPrep);
-		}
+		public JID(string jid, bool skipStringPrep)
+            : this(getParts(jid), skipStringPrep)
+        { }
 
-		private JID(String[] parts, boolean skipStringPrep) {
-			this(parts[0], parts[1], parts[2], skipStringPrep);
-		}
+		private JID(string[] parts, bool skipStringPrep)
+            : this(parts[0], parts[1], parts[2], skipStringPrep)
+        { }
 
 		/**
      * Constructs a JID given a node, domain, and resource.
@@ -487,9 +491,9 @@ namespace org.xmpp.packet
      * @throws NullPointerException if domain is <tt>null</tt>.
      * @throws IllegalArgumentException if the JID is not valid.
      */
-		public JID(String node, String domain, String resource) {
-			this(node, domain, resource, false);
-		}
+		public JID(string node, string domain, string resource)
+            : this(node, domain, resource, false)
+        { }
 
 		/**
      * Constructs a JID given a node, domain, and resource being able to specify if stringprep
@@ -502,7 +506,8 @@ namespace org.xmpp.packet
      * @throws NullPointerException if domain is <tt>null</tt>.
      * @throws IllegalArgumentException if the JID is not valid.
      */
-		public JID(String node, String domain, String resource, boolean skipStringprep) {
+		public JID(string node, string domain, string resource, bool skipStringprep)
+        {
 			if (domain == null) {
 				throw new NullPointerException("Domain cannot be null");
 			}
@@ -513,10 +518,10 @@ namespace org.xmpp.packet
 			}
 			else {
 				// Set node and resource to null if they are the empty string.
-				if (node != null && node.equals("")) {
+				if (node != null && node.Equals("")) {
 					node = null;
 				}
-				if (resource != null && resource.equals("")) {
+				if (resource != null && resource.Equals("")) {
 					resource = null;
 				}
 				// Stringprep (node prep, resourceprep, etc).
@@ -528,13 +533,13 @@ namespace org.xmpp.packet
 				catch (Exception e) {
 					StringBuilder buf = new StringBuilder();
 					if (node != null) {
-						buf.append(node).append("@");
+						buf.Append(node).Append("@");
 					}
-					buf.append(domain);
+					buf.Append(domain);
 					if (resource != null) {
-						buf.append("/").append(resource);
+						buf.Append("/").Append(resource);
 					}
-					throw new IllegalArgumentException("Illegal JID: " + buf.toString(), e);
+					throw new IllegalArgumentException("Illegal JID: " + buf.ToString(), e);
 				}
 			}
 		}
@@ -546,28 +551,28 @@ namespace org.xmpp.packet
      * @param jid the textual JID representation.
      * @return a string array with the parsed node, domain and resource.
      */
-		static String[] getParts(String jid) {
-			String[] parts = new String[3];
-			String node = null , domain, resource;
+		static string[] getParts(string jid) {
+			string[] parts = new string[3];
+			string node = null , domain, resource;
 			if (jid == null) {
 				return parts;
 			}
 
-			int atIndex = jid.indexOf("@");
-			int slashIndex = jid.indexOf("/");
+			int atIndex = jid.IndexOf("@");
+			int slashIndex = jid.IndexOf("/");
 
 			// Node
 			if (atIndex > 0) {
-				node = jid.substring(0, atIndex);
+				node = jid.Substring(0, atIndex);
 			}
 
 			// Domain
-			if (atIndex + 1 > jid.length()) {
+			if (atIndex + 1 > jid.Length) {
 				throw new IllegalArgumentException("JID with empty domain not valid");
 			}
 			if (atIndex < 0) {
 				if (slashIndex > 0) {
-					domain = jid.substring(0, slashIndex);
+					domain = jid.Substring(0, slashIndex);
 				}
 				else {
 					domain = jid;
@@ -575,19 +580,19 @@ namespace org.xmpp.packet
 			}
 			else {
 				if (slashIndex > 0) {
-					domain = jid.substring(atIndex + 1, slashIndex);
+					domain = jid.Substring(atIndex + 1, slashIndex);
 				}
 				else {
-					domain = jid.substring(atIndex + 1);
+					domain = jid.Substring(atIndex + 1);
 				}
 			}
 
 			// Resource
-			if (slashIndex + 1 > jid.length() || slashIndex < 0) {
+			if (slashIndex + 1 > jid.Length || slashIndex < 0) {
 				resource = null;
 			}
 			else {
-				resource = jid.substring(slashIndex + 1);
+				resource = jid.Substring(slashIndex + 1);
 			}
 			parts[0] = node;
 			parts[1] = domain;
@@ -629,11 +634,11 @@ namespace org.xmpp.packet
      * @return the bare JID.
      */
 		public String toBareJID() {
-			final StringBuilder sb = new StringBuilder();
-			sb.append(this.node);
-			sb.append('@');
-			sb.append(this.domain);
-			return sb.toString();
+			StringBuilder sb = new StringBuilder();
+			sb.Append(this.node);
+			sb.Append('@');
+			sb.Append(this.domain);
+			return sb.ToString();
 		}
 
 		/**
@@ -654,18 +659,18 @@ namespace org.xmpp.packet
 				                            + "without a resource identifier. A full "
 				                            + "JID representation is not available for: " + toString());
 			}
-			final StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 			if (this.node != null) {
-				sb.append(this.node);
-				sb.append('@');
+				sb.Append(this.node);
+				sb.Append('@');
 			}
-			sb.append(this.domain);
+			sb.Append(this.domain);
 			if (this.resource != null) {
-				sb.append('/');
-				sb.append(this.resource);
+				sb.Append('/');
+				sb.Append(this.resource);
 			}
 
-			return sb.toString();
+			return sb.ToString();
 		}
 
 		/**
@@ -674,35 +679,35 @@ namespace org.xmpp.packet
      * @return a String representation of the JID.
      */
 		public String toString() {
-			final StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
 			if (this.node != null) {
-				sb.append(this.node);
-				sb.append('@');
+				sb.Append(this.node);
+				sb.Append('@');
 			}
 			sb.append(this.domain);
 			if (this.resource != null) {
-				sb.append('/');
-				sb.append(this.resource);
+				sb.Append('/');
+				sb.Append(this.resource);
 			}
 
-			return sb.toString();
+			return sb.ToString();
 		}
 
 		public int hashCode() {
-			return toString().hashCode();
+			return ToString().GetHashCode();
 		}
 
-		public boolean equals(Object object) {
-			if (!(object instanceof JID)) {
+		public bool equals(object @object) {
+			if (!(@object is JID)) {
 				return false;
 			}
-			if (this == object) {
+			if (this == @object) {
 				return true;
 			}
-			JID jid = (JID)object;
+			JID jid = (JID)@object;
 			// Node. If node isn't null, compare.
 			if (node != null) {
-				if (!node.equals(jid.node)) {
+				if (!node.Equals(jid.node)) {
 					return false;
 				}
 			}
@@ -711,12 +716,12 @@ namespace org.xmpp.packet
 				return false;
 			}
 			// Compare domain, which must be null.
-			if (!domain.equals(jid.domain)) {
+			if (!domain.Equals(jid.domain)) {
 				return false;
 			}
 			// Resource. If resource isn't null, compare.
 			if (resource != null) {
-				if (!resource.equals(jid.resource)) {
+				if (!resource.Equals(jid.resource)) {
 					return false;
 				}
 			}
@@ -730,16 +735,16 @@ namespace org.xmpp.packet
 
 		public int compareTo(JID jid) {
 			// Comparison order is domain, node, resource.
-			int compare = domain.compareTo(jid.domain);
+			int compare = domain.CompareTo(jid.domain);
 			if (compare == 0) {
 				String myNode = node != null ? node : "";
 				String hisNode = jid.node != null ? jid.node : "";
-				compare = myNode.compareTo(hisNode);
+				compare = myNode.CompareTo(hisNode);
 			}
 			if (compare == 0) {
 				String myResource = resource != null ? resource : "";
 				String hisResource = jid.resource != null ? jid.resource : "";
-				compare = myResource.compareTo(hisResource);
+				compare = myResource.CompareTo(hisResource);
 			}
 			return compare;
 		}
@@ -759,7 +764,7 @@ namespace org.xmpp.packet
      * @return true if the JIDs are equivalent; false otherwise.
      * @throws IllegalArgumentException if either JID is not valid.
      */
-		public static boolean equals(String jid1, String jid2) {
+		public static bool equals(string jid1, string jid2) {
 			return new JID(jid1).equals(new JID(jid2));
 		}
 	}

@@ -39,8 +39,8 @@ namespace org.xmpp.component
      *
      * @return a ComponentManager instance.
      */
-		@SuppressWarnings("unchecked")
-		public static synchronized ComponentManager getComponentManager() {
+		public static ComponentManager getComponentManager()
+        {
 			if (componentManager != null) {
 				return componentManager;
 			}

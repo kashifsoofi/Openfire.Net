@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.Generic;
 
 namespace org.xmpp.resultsetmangement
 {
@@ -31,7 +32,7 @@ namespace org.xmpp.resultsetmangement
 	/// 
 	/// @author Guus der Kinderen, guus.der.kinderen@gmail.com
 	/// 
-	/// @param <E>
+	/// @param <T>
 	///            Each result set should be a collection of instances of the exact
 	///            same class. This class must implement the {@link Result}
 	///            interface.
@@ -46,13 +47,13 @@ namespace org.xmpp.resultsetmangement
 		/**
 	 * A list of all results in this ResultSet
 	 */
-		public final List<E> resultList;
+		public List<T> resultList;
 
 		/**
 	 * A mapping of the UIDs of all results in resultList, to the index of those
 	 * entries in that list.
 	 */
-		public final Map<String, Integer> uidToIndex;
+		public Map<string, int> uidToIndex;
 
 		/**
 	 * Creates a new Result Set instance, based on a collection of Result
@@ -69,7 +70,7 @@ namespace org.xmpp.resultsetmangement
 	 * @param results
 	 *            The collection of Results that make up this result set.
 	 */
-		public ResultSetImpl(Collection<E> results) {
+		public ResultSetImpl(Collection<T> results) {
 			this(results, null);
 		}
 
@@ -90,19 +91,19 @@ namespace org.xmpp.resultsetmangement
 	 *            The Comparator that defines the order of the Results in this
 	 *            result set.
 	 */
-		public ResultSetImpl(Collection<E> results, Comparator<E> comparator) {
+		public ResultSetImpl(Collection<T> results, Comparator<T> comparator) {
 			if (results == null) {
 				throw new NullPointerException("Argument 'results' cannot be null.");
 			}
 
 			final int size = results.size();
-			resultList = new ArrayList<E>(size);
+			resultList = new ArrayList<T>(size);
 			uidToIndex = new Hashtable<String, Integer>(size);
 
 			// sort the collection, if need be.
-			List<E> sortedResults = null;
+			List<T> sortedResults = null;
 			if (comparator != null) {
-				sortedResults = new ArrayList<E>(results);
+				sortedResults = new ArrayList<T>(results);
 				Collections.sort(sortedResults, comparator);
 			}
 
@@ -142,7 +143,7 @@ namespace org.xmpp.resultsetmangement
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#getAfter(E, int)
 	 */
 		@Override
-		public List<E> getAfter(String uid, int maxAmount) {
+		public List<T> getAfter(String uid, int maxAmount) {
 			if (uid == null || uid.length() == 0) {
 				throw new NullPointerException("Argument 'uid' cannot be null or an empty String.");
 			}
@@ -163,8 +164,7 @@ namespace org.xmpp.resultsetmangement
 	 * 
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#getBefore(E, int)
 	 */
-		@Override
-		public List<E> getBefore(String uid, int maxAmount) {
+		public override List<T> getBefore(String uid, int maxAmount) {
 			if (uid == null || uid.length() == 0) {
 				throw new NullPointerException("Argument 'uid' cannot be null or an empty String.");
 			}
@@ -190,8 +190,7 @@ namespace org.xmpp.resultsetmangement
 	 * 
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#get(int)
 	 */
-		@Override
-		public E get(int index) {
+		public override T get(int index) {
 			return resultList.get(index);
 		}
 
@@ -200,8 +199,7 @@ namespace org.xmpp.resultsetmangement
 	 * 
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#getFirst(int)
 	 */
-		@Override
-		public List<E> getFirst(int maxAmount) {
+		public override List<T> getFirst(int maxAmount) {
 			if (maxAmount < 1) {
 				throw new IllegalArgumentException(
 					"Argument 'maxAmount' must be a integer higher than zero.");
@@ -215,8 +213,7 @@ namespace org.xmpp.resultsetmangement
 	 * 
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#getLast(int)
 	 */
-		@Override
-		public List<E> getLast(int maxAmount) {
+		public override List<T> getLast(int maxAmount) {
 			if (maxAmount < 1) {
 				throw new IllegalArgumentException(
 					"Argument 'maxAmount' must be a integer higher than zero.");
@@ -237,7 +234,7 @@ namespace org.xmpp.resultsetmangement
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#get(int, int)
 	 */
 		@Override
-		public List<E> get(int fromIndex, int maxAmount) {
+		public List<T> get(int fromIndex, int maxAmount) {
 			if (fromIndex < 0) {
 				throw new IllegalArgumentException(
 					"Argument 'fromIndex' must be zero or higher.");
@@ -249,7 +246,7 @@ namespace org.xmpp.resultsetmangement
 			}
 
 			if (fromIndex >= size()) {
-				return new ArrayList<E>(0);
+				return new ArrayList<T>(0);
 			}
 
 			// calculate the last index to return, or return up to the end of last

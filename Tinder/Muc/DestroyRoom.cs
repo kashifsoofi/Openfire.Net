@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
-using org.xmpp.packet
+using org.xmpp.packet;
 
 namespace org.xmpp.muc
 {
@@ -33,7 +33,8 @@ namespace org.xmpp.muc
      * @param alternateJID JID of the alternate room or <tt>null</tt> if none.
      * @param reason       reason for the destruction or <tt>null</tt> if none.
      */
-		public DestroyRoom(JID alternateJID, String reason) {
+		public DestroyRoom(JID alternateJID, String reason)
+        {
 			super();
 			setType(Type.set);
 			Element query = setChildElement("query", "http://jabber.org/protocol/muc#owner");

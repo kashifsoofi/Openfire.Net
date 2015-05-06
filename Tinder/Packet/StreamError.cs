@@ -23,7 +23,7 @@ namespace org.xmpp.packet
  */
 	public class StreamError
 	{
-		private static final String ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-streams";
+		private static readonly string ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-streams";
 
 		private static DocumentFactory docFactory = DocumentFactory.getInstance();
 

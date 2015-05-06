@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using org.xmpp.packet;
 using System;
 
 namespace org.xmpp.component
@@ -33,7 +34,7 @@ namespace org.xmpp.component
      * @param component the component.
      * @throws ComponentException if the component connection is lost and the component cannot be added.
      */
-		void addComponent(String subdomain, Component component) throws ComponentException;
+		void addComponent(String subdomain, Component component);
 
 		/**
      * Removes a component. The {@link Component#shutdown} method will be called on the
@@ -42,7 +43,7 @@ namespace org.xmpp.component
      * @param subdomain the subdomain of the component's address.
      * @throws ComponentException if the component connection is lost and the component cannot be removed.
      */
-		void removeComponent(String subdomain) throws ComponentException;
+		void removeComponent(String subdomain);
 
 		/**
      * Sends a packet to the XMPP server. The "from" value of the packet must not be null.
@@ -56,7 +57,7 @@ namespace org.xmpp.component
      * @throws ComponentException if the component connection is lost or unavialble during the time of sending and
      * recieving packets.
      */
-		void sendPacket(Component component, Packet packet) throws ComponentException;
+		void sendPacket(Component component, Packet packet);
 
 		/**
      * Sends an IQ packet to the XMPP server and waits to get an IQ of type result or error.
@@ -76,7 +77,7 @@ namespace org.xmpp.component
      * @throws ComponentException if the component connection is lost or unavialble during the time of sending and
      * recieving packets.
      */
-		IQ query(Component component, IQ packet, long timeout) throws ComponentException;
+		IQ query(Component component, IQ packet, long timeout);
 
 		/**
      * Sends an IQ packet to the server and returns immediately. The specified IQResultListener
@@ -88,7 +89,7 @@ namespace org.xmpp.component
      * @throws ComponentException if the component connection is lost or unavialble during the time of sending and
      * recieving packets.
      */
-		void query(Component component, IQ packet, IQResultListener listener) throws ComponentException;
+		void query(Component component, IQ packet, IQResultListener listener);
 
 		/**
      * Returns a property value specified by name. Properties can be used by

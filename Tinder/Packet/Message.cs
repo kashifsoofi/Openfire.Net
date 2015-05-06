@@ -59,7 +59,7 @@ namespace org.xmpp.packet
      * @param element the message Element.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public Message(Element element, boolean skipValidation) {
+		public Message(Element element, bool skipValidation) {
 			super(element, skipValidation);
 		}
 
@@ -217,7 +217,6 @@ namespace org.xmpp.packet
      * @return the first matching child element, or <tt>null</tt> if there
      *      is no matching child element.
      */
-		@SuppressWarnings("unchecked")
 		public Element getChildElement(String name, String namespace) {
 			for (Iterator<Element> i=element.elementIterator(name); i.hasNext(); ) {
 				Element element = i.next();

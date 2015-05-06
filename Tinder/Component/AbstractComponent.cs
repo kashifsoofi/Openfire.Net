@@ -115,7 +115,7 @@ namespace org.xmpp.component
 	 * if <tt>true</tt>, the component will make sure that every request that is
 	 * received is answered, as specified by the XMPP specification.
 	 */
-		private final boolean enforceIQResult;
+		private final bool enforceIQResult;
 
 		/**
 	 * The timestamp (in milliseconds) when the component was last (re)started. 
@@ -145,7 +145,7 @@ namespace org.xmpp.component
 	 *            specification.
 	 */
 		public AbstractComponent(int maxThreadpoolSize, int maxQueueSize,
-		                     boolean enforceIQResult) {
+		                     bool enforceIQResult) {
 			this.maxThreadPoolSize = maxThreadpoolSize;
 			this.maxQueueSize = maxQueueSize;
 			this.enforceIQResult = enforceIQResult;
@@ -828,7 +828,7 @@ namespace org.xmpp.component
 	 * @return <tt>true</tt> if this component serves local users only, <tt>
 	 *         false</tt> otherwise.
 	 */
-		public boolean servesLocalUsersOnly() {
+		public bool servesLocalUsersOnly() {
 			return false;
 		}
 
@@ -976,7 +976,7 @@ namespace org.xmpp.component
 	 * @return <tt>true</tt> if the stanza was sent by something inside the
 	 *         local XMPP domain, <tt>false</tt> otherwise.
 	 */
-		private boolean sentByLocalEntity(final Packet packet) {
+		private bool sentByLocalEntity(final Packet packet) {
 			final JID from = packet.getFrom();
 			if (from == null) {
 				return true;

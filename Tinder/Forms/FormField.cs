@@ -48,7 +48,6 @@ namespace org.xmpp.forms
 		/**
      * Removes all the values of the field.
      */
-		@SuppressWarnings("unchecked")
 		public void clearValues() {
 			for (Iterator<Element> it = element.elementIterator("value"); it.hasNext();) {
 				it.next();
@@ -101,7 +100,7 @@ namespace org.xmpp.forms
      * <li>text-multi -> multiple lines of text entry
      * <li>list-single -> given a list of choices, pick one
      * <li>list-multi -> given a list of choices, pick one or more
-     * <li>boolean -> 0 or 1, true or false, yes or no. Default value is 0
+     * <li>bool -> 0 or 1, true or false, yes or no. Default value is 0
      * <li>fixed -> fixed for putting in text to show sections, or just advertise your web
      * site in the middle of the form
      * <li>hidden -> is not given to the user at all, but returned with the questionnaire
@@ -141,7 +140,7 @@ namespace org.xmpp.forms
      *
      * @param required if the question must be answered in order to complete the questionnaire.
      */
-		public void setRequired(boolean required) {
+		public void setRequired(bool required) {
 			// Remove an existing desc element.
 			if (element.element("required") != null) {
 				element.remove(element.element("required"));
@@ -181,7 +180,7 @@ namespace org.xmpp.forms
      *
      * @return true if the question must be answered in order to complete the questionnaire.
      */
-		public boolean isRequired() {
+		public bool isRequired() {
 			return element.element("required") != null;
 		}
 
@@ -201,7 +200,6 @@ namespace org.xmpp.forms
      *
      * @return an Iterator for the default values or answered values of the question.
      */
-		@SuppressWarnings("unchecked")
 		public List<String> getValues() {
 			List<String> answer = new ArrayList<String>();
 			for (Iterator<Element> it = element.elementIterator("value"); it.hasNext();) {
@@ -218,7 +216,6 @@ namespace org.xmpp.forms
 	 *            The field from which to return the first value.
 	 * @return String based value, or 'null' if the FormField has no values.
 	 */
-		@SuppressWarnings("unchecked")
 		public String getFirstValue()
 		{
 			for (Iterator<Element> it = element.elementIterator("value"); it.hasNext();) {
@@ -238,7 +235,7 @@ namespace org.xmpp.forms
      * <li>text-multi -> multiple lines of text entry
      * <li>list-single -> given a list of choices, pick one
      * <li>list-multi -> given a list of choices, pick one or more
-     * <li>boolean -> 0 or 1, true or false, yes or no. Default value is 0
+     * <li>bool -> 0 or 1, true or false, yes or no. Default value is 0
      * <li>fixed -> fixed for putting in text to show sections, or just advertise your web
      * site in the middle of the form
      * <li>hidden -> is not given to the user at all, but returned with the questionnaire
@@ -336,7 +333,7 @@ namespace org.xmpp.forms
          * options. The allowable values are 1 for yes/true/assent and 0 for no/false/decline.
          * The default value is 0.
          */
-			boolean_type("boolean"),
+			bool_type("bool"),
 
 			/**
          * The field is intended for data description (e.g., human-readable text such as
@@ -402,8 +399,8 @@ namespace org.xmpp.forms
 					throw new NullPointerException();
 				}
 				type = type.toLowerCase();
-				if (boolean_type.toXMPP().equals(type)) {
-					return boolean_type;
+				if (bool_type.toXMPP().equals(type)) {
+					return bool_type;
 				}
 				else if (fixed.toXMPP().equals(type)) {
 					return fixed;

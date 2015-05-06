@@ -140,7 +140,6 @@ namespace org.xmpp.packet
      * @param groups a Collection of groups.
      * @return the newly created item.
      */
-		@SuppressWarnings("unchecked")
 		public Item addItem(JID jid, String name, Ask ask, Subscription subscription,
 		                Collection<String> groups)
 		{
@@ -188,7 +187,6 @@ namespace org.xmpp.packet
      *
      * @param jid the JID of the item to remove.
      */
-		@SuppressWarnings("unchecked")
 		public void removeItem(JID jid) {
 			Element query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
 			if (query != null) {
@@ -207,7 +205,6 @@ namespace org.xmpp.packet
      *
      * @return an unmodifable copy of the {@link Item Items} in the roster packet.
      */
-		@SuppressWarnings("unchecked")
 		public Collection<Item> getItems() {
 			Collection<Item> items = new ArrayList<Item>();
 			Element query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));

@@ -28,7 +28,7 @@ namespace org.xmpp.resultsetmangement
 	/// 
 	/// @author Guus der Kinderen, guus.der.kinderen@gmail.com
 	/// 
-	/// @param <E>
+	/// @param <T>
 	///            Each result set should be a collection of instances of the exact
 	///            same class. This class must implement the {@link Result}
 	///            interface.
@@ -99,7 +99,7 @@ namespace org.xmpp.resultsetmangement
 	 *             if the result does not exist in the result set.
 	 * 
 	 */
-		public List<E> getBefore(E result, int maxAmount) {
+		public List<T> getBefore(E result, int maxAmount) {
 			return getBefore(result.getUID(), maxAmount);
 		}
 
@@ -124,7 +124,7 @@ namespace org.xmpp.resultsetmangement
 	 * @throws NullPointerException
 	 *             if there is no result in the result set that matches the UID.
 	 */
-		public abstract List<E> getBefore(String uid, int maxAmount);
+		public abstract List<T> getBefore(String uid, int maxAmount);
 
 		/**
 	 * Returns the first elements from this result set.
@@ -133,7 +133,7 @@ namespace org.xmpp.resultsetmangement
 	 *            the number of elements to return.
 	 * @return the last 'maxAmount' elements of this result set.
 	 */
-		public abstract List<E> getFirst(int maxAmount);
+		public abstract List<T> getFirst(int maxAmount);
 
 		/**
 	 * Returns the last elements from this result set.
@@ -142,7 +142,7 @@ namespace org.xmpp.resultsetmangement
 	 *            the number of elements to return.
 	 * @return the last 'maxAmount' elements of this result set.
 	 */
-		public abstract List<E> getLast(int maxAmount);
+		public abstract List<T> getLast(int maxAmount);
 
 		/**
 	 * Returns the element denoted by the index.
@@ -169,7 +169,7 @@ namespace org.xmpp.resultsetmangement
 	 *         referenced by 'fromIndex'. An empty List if startIndex is equal
 	 *         to or bigger than the size of this entire result set.
 	 */
-		public abstract List<E> get(int fromIndex, int maxAmount);
+		public abstract List<T> get(int fromIndex, int maxAmount);
 
 		/**
 	 * Returns the UID of the object at the specified index in this result set.
@@ -212,7 +212,7 @@ namespace org.xmpp.resultsetmangement
 	 * @see java.util.AbstractCollection#iterator()
 	 */
 		@Override
-		public Iterator<E> iterator() {
+		public Iterator<T> iterator() {
 			return new Itr();
 		}
 
@@ -226,7 +226,7 @@ namespace org.xmpp.resultsetmangement
 	 *            directives.
      * @return a list of Results that matches the directives.
 	 */
-		public List<E> applyRSMDirectives(Element rsmElement) {
+		public List<T> applyRSMDirectives(Element rsmElement) {
 			if (rsmElement == null || !isValidRSMRequest(rsmElement)) {
 				throw new IllegalArgumentException(
 					"The 'rsmElement' argument must be a valid, non-null RSM element.");
@@ -240,9 +240,9 @@ namespace org.xmpp.resultsetmangement
 			}
 
 			// optional elements
-			final Element afterElement = rsmElement.element("after");
-			final Element beforeElement = rsmElement.element("before");
-			final Element indexElement = rsmElement.element("index");
+			Element afterElement = rsmElement.element("after");
+			Element beforeElement = rsmElement.element("before");
+			Element indexElement = rsmElement.element("index");
 
 			// Identify the pointer object in this set. This is the object before
 			// (or after) the first (respectivly last) element of the subset that
@@ -252,7 +252,7 @@ namespace org.xmpp.resultsetmangement
 			// first element of the set.
 
 			// by default, the search list is forward oriented.
-			boolean isForwardOriented = true;
+			bool isForwardOriented = true;
 
 			if (afterElement != null) {
 				pointerUID = afterElement.getText();
@@ -294,7 +294,7 @@ namespace org.xmpp.resultsetmangement
 	 * @return An Element named 'set' that can be included in the result IQ
 	 *         stanza, which returns the subset of results.
 	 */
-		public Element generateSetElementFromResults(List<E> returnedResults) {
+		public Element generateSetElementFromResults(List<T> returnedResults) {
 			if (returnedResults == null) {
 				throw new IllegalArgumentException(
 					"Argument 'returnedResults' cannot be null.");
@@ -328,8 +328,7 @@ namespace org.xmpp.resultsetmangement
 	 *         otherwise.
 	 */
 		// Dom4J doesn't do generics, sadly.
-		@SuppressWarnings("unchecked")
-		public static boolean isValidRSMRequest(Element rsmElement) {
+		public static bool isValidRSMRequest(Element rsmElement) {
 			if (rsmElement == null) {
 				throw new IllegalArgumentException(
 					"The argument 'rsmElement' cannot be null.");
@@ -346,7 +345,7 @@ namespace org.xmpp.resultsetmangement
 				return false;
 			}
 
-			final Element maxElement = rsmElement.element("max");
+			Element maxElement = rsmElement.element("max");
 			if (maxElement == null) {
 				// The 'max' element in an RSM request must be available
 				return false;
@@ -414,7 +413,7 @@ namespace org.xmpp.resultsetmangement
 	 * @author Guus der Kinderen, guus@nimbuzz.com
 	 * 
 	 */
-		class Itr implements Iterator<E> {
+		class Itr implements Iterator<T> {
 			/**
 		 * Index of element to be returned by subsequent call to next.
 		 */
@@ -425,7 +424,7 @@ namespace org.xmpp.resultsetmangement
 		 * 
 		 * @see java.util.Iterator#hasNext()
 		 */
-			public boolean hasNext() {
+			public bool hasNext() {
 				return cursor != size();
 			}
 

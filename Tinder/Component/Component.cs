@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using org.xmpp.packet;
 using System;
 
 namespace org.xmpp.component
@@ -65,7 +66,7 @@ namespace org.xmpp.component
      * @param componentManager the component manager.
      * @throws ComponentException if an error occured while initializing the component.
      */
-		void initialize(JID jid, ComponentManager componentManager) throws ComponentException;
+		void initialize(JID jid, ComponentManager componentManager);
 
 		/**
      * Notification message indicating that the component will start receiving incoming

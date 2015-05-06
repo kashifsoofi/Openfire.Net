@@ -1,4 +1,5 @@
-﻿// Copyright (C) 2004-2009 Jive Software. All rights reserved.
+﻿using NLog;
+// Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ namespace org.xmpp.packet
  */
 	public class IQ : Packet
 	{
-		private static final Logger Log = LoggerFactory.getLogger(Packet.class);
+		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
 		// Sequence and random number generator used for creating unique ID's.
 		private static int sequence = 0;
@@ -87,7 +88,7 @@ namespace org.xmpp.packet
      * @param element the IQ Element.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public IQ(Element element, boolean skipValidation) {
+		public IQ(Element element, bool skipValidation) {
 			super(element, skipValidation);
 		}
 
@@ -129,7 +130,7 @@ namespace org.xmpp.packet
      * @see Type
      */
 		public void setType(Type type) {
-			element.addAttribute("type", type==null?null:type.toString());
+			element.addAttribute("type", type==null?null:type.ToString());
 		}
 
 		/**
@@ -137,7 +138,7 @@ namespace org.xmpp.packet
      *
      * @return True or false if this is a request stanza
      */
-		public boolean isRequest() {
+		public bool isRequest() {
 			Type type = getType();
 			return (type != null && (type.equals(Type.get) || type.equals(Type.set)));
 		}
@@ -147,7 +148,7 @@ namespace org.xmpp.packet
      *
      * @return True or false if this is a response stanza
      */
-		public boolean isResponse() {
+		public bool isResponse() {
 			Type type = getType();
 			return (type != null && (type.equals(Type.result) || type.equals(Type.error)));
 		}
@@ -165,7 +166,6 @@ namespace org.xmpp.packet
      *
      * @return the child element.
      */
-		@SuppressWarnings("unchecked")
 		public Element getChildElement() {
 			List<Element> elements = element.elements();
 			if (elements.isEmpty()) {
@@ -206,7 +206,6 @@ namespace org.xmpp.packet
      *
      * @param childElement the child element.
      */
-		@SuppressWarnings("unchecked")
 		public void setChildElement(Element childElement) {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 				element.remove(i.next());
@@ -236,7 +235,6 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return the newly created child element.
      */
-		@SuppressWarnings("unchecked")
 		public Element setChildElement(String name, String namespace) {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 				element.remove(i.next());
@@ -283,7 +281,6 @@ namespace org.xmpp.packet
      * @return a PacketExtension on the first element found in this packet for the specified
      *         name and namespace or <tt>null</tt> if none was found.
      */
-		@SuppressWarnings("unchecked")
 		public PacketExtension getExtension(String name, String namespace) {
 			Element childElement = getChildElement();
 			if (childElement == null) {
@@ -325,8 +322,7 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return true if a child element was removed.
      */
-		@SuppressWarnings("unchecked")
-		public boolean deleteExtension(String name, String namespace) {
+		public bool deleteExtension(String name, String namespace) {
 			Element childElement = getChildElement();
 			if (childElement == null) {
 				return false;

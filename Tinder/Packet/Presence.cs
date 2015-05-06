@@ -63,7 +63,7 @@ namespace org.xmpp.packet
      * @param element the Presence Element.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public Presence(Element element, boolean skipValidation) {
+		public Presence(Element element, bool skipValidation) {
 			super(element, skipValidation);
 		}
 
@@ -89,7 +89,7 @@ namespace org.xmpp.packet
      * <pre>getType() == null</pre>
      *
      */
-		public boolean isAvailable() {
+		public bool isAvailable() {
 			return getType() == null;
 		}
 
@@ -260,7 +260,6 @@ namespace org.xmpp.packet
      * @return the first matching child element, or <tt>null</tt> if there
      *      is no matching child element.
      */
-		@SuppressWarnings("unchecked")
 		public Element getChildElement(String name, String namespace) {
 			for (Iterator<Element> i=element.elementIterator(name); i.hasNext(); ) {
 				Element element = i.next();

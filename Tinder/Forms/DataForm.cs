@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using org.xmpp.packet;
+using org.xmpp.util;
 using System;
 
 namespace org.xmpp.forms
@@ -36,23 +38,24 @@ namespace org.xmpp.forms
  */
 	public class DataForm : PacketExtension
 	{
-		private static final SimpleDateFormat UTC_FORMAT = new SimpleDateFormat(
+		private static readonly SimpleDateFormat UTC_FORMAT = new SimpleDateFormat(
 			XMPPConstants.XMPP_DELAY_DATETIME_FORMAT);
-		private static final FastDateFormat FAST_UTC_FORMAT =
+		private static readonly FastDateFormat FAST_UTC_FORMAT =
 			FastDateFormat.getInstance(XMPPConstants.XMPP_DELAY_DATETIME_FORMAT,
 			                           TimeZone.getTimeZone("UTC"));
 
 		/**
      * Element name of the packet extension.
      */
-		public static final String ELEMENT_NAME = "x";
+		public static readonly string ELEMENT_NAME = "x";
 
 		/**
      * Namespace of the packet extension.
      */
-		public static final String NAMESPACE = "jabber:x:data";
+		public static readonly string NAMESPACE = "jabber:x:data";
 
-		static {
+		static DataForm()
+        {
 			UTC_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
 			// Register that DataForms uses the jabber:x:data namespace
 			registeredExtensions.put(QName.get(ELEMENT_NAME, NAMESPACE), DataForm.class);
@@ -66,14 +69,15 @@ namespace org.xmpp.forms
      * @return the Date obtained by parsing the specified date representation.
      * @throws ParseException if an error occurs while parsing the date representation.
      */
-		public static Date parseDate(String date) throws ParseException {
+		public static DateTime parseDate(string date)
+        {
 			synchronized (UTC_FORMAT) {
 				return UTC_FORMAT.parse(date);
 			}
 		}
 
-		public static boolean parseBoolean(String booleanString) throws ParseException {
-			return "1".equals(booleanString) || "true".equals(booleanString);
+		public static bool parsebool(String boolString) throws ParseException {
+			return "1".equals(boolString) || "true".equals(boolString);
 		}
 
 		/**
@@ -82,17 +86,17 @@ namespace org.xmpp.forms
      * @param object the object to encode.
      * @return the String representation of an Object to be used as a field value.
      */
-		static String encode(Object object) {
-			if (object instanceof String) {
-				return object.toString();
+		static string encode(object @object) {
+			if (@object instanceof String) {
+				return @object.toString();
 			}
-			else if (object instanceof Boolean) {
-				return Boolean.TRUE.equals(object) ? "1" : "0";
+			else if (@object instanceof bool) {
+				return bool.TRUE.equals(@object) ? "1" : "0";
 			}
-			else if (object instanceof Date) {
-				return FAST_UTC_FORMAT.format((Date) object);
+			else if (@object instanceof Date) {
+				return FAST_UTC_FORMAT.format((Date) @object);
 			}
-			return object.toString();
+			return @object.toString();
 		}
 
 		public DataForm(Type type) {
@@ -263,7 +267,7 @@ namespace org.xmpp.forms
      * @return true if the field was removed.
      */
 		@SuppressWarnings("unchecked")
-		public boolean removeField(String variable) {
+		public bool removeField(String variable) {
 			for (Iterator<Element> it = element.elementIterator("field"); it.hasNext();) {
 				Element field = it.next();
 				String fieldVariable = field.attributeValue("var");

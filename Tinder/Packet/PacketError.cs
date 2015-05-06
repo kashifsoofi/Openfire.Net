@@ -23,7 +23,7 @@ namespace org.xmpp.packet
  */
 	public class PacketError
 	{
-		private static final String ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-stanzas";
+		private static readonly string ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-stanzas";
 
 		private static DocumentFactory docFactory = DocumentFactory.getInstance();
 

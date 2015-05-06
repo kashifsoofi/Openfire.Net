@@ -1,4 +1,5 @@
-﻿// Copyright (C) 2004-2009 Jive Software. All rights reserved.
+﻿using NLog;
+// Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,9 +33,9 @@ namespace org.xmpp.packet
  */
 	public abstract class Packet
 	{
-		private static final Logger Log = LoggerFactory.getLogger(Packet.class);
+		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-		protected static final DocumentFactory docFactory = DocumentFactory.getInstance();
+		protected static readonly DocumentFactory docFactory = DocumentFactory.getInstance();
 
 		protected Element element;
 
@@ -64,7 +65,7 @@ namespace org.xmpp.packet
      * @param element the XML Element that contains the packet contents.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public Packet(Element element, boolean skipValidation) {
+		public Packet(Element element, bool skipValidation) {
 			this.element = element;
 			// Apply stringprep profiles to the "to" and "from" values.
 			String to = element.attributeValue("to");
@@ -305,7 +306,7 @@ namespace org.xmpp.packet
      * @return true if a child element was removed.
      */
 		@SuppressWarnings("unchecked")
-		public boolean deleteExtension(String name, String namespace) {
+		public bool deleteExtension(String name, String namespace) {
 			List<Element> extensions = element.elements(QName.get(name, namespace));
 			if (!extensions.isEmpty()) {
 				element.remove(extensions.get(0));

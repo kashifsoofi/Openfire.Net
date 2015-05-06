@@ -31,12 +31,12 @@ namespace org.xmpp.packet
  */
 	public class PacketExtension
 	{
-		protected static final DocumentFactory docFactory = DocumentFactory.getInstance();
+		protected static readonly DocumentFactory docFactory = DocumentFactory.getInstance();
 		/**
      * Subclasses of PacketExtension should register the element name and namespace that the
      * subclass is using.
      */
-		protected static final Map<QName, Class<? extends PacketExtension>> registeredExtensions = new ConcurrentHashMap<QName, Class<? extends PacketExtension>>();
+		protected static readonly Map<QName, Class<? extends PacketExtension>> registeredExtensions = new ConcurrentHashMap<QName, Class<? extends PacketExtension>>();
 
 		protected Element element;
 
