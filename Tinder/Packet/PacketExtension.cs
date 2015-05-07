@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -31,14 +32,14 @@ namespace org.xmpp.packet
  */
 	public class PacketExtension
 	{
-		protected static readonly DocumentFactory docFactory = DocumentFactory.getInstance();
+		protected static readonly XDocument docFactory = new XDocument();
 		/**
      * Subclasses of PacketExtension should register the element name and namespace that the
      * subclass is using.
      */
 		protected static readonly Map<QName, Class<? extends PacketExtension>> registeredExtensions = new ConcurrentHashMap<QName, Class<? extends PacketExtension>>();
 
-		protected Element element;
+		protected XElement element;
 
 		/**
      * Returns the extension class to use for the specified element name and namespace. For
@@ -49,8 +50,8 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return the extension class to use for the specified element name and namespace.
      */
-		public static Class<? extends PacketExtension> getExtensionClass(String name, String namespace) {
-			return registeredExtensions.get(QName.get(name, namespace));
+		public static Class<? extends PacketExtension> getExtensionClass(String name, String @namespace) {
+			return registeredExtensions.get(QName.get(name, @namespace));
 		}
 
 		/**
@@ -59,8 +60,10 @@ namespace org.xmpp.packet
      * @param name the child element name.
      * @param namespace the child element namespace.
      */
-		public PacketExtension(String name, String namespace) {
-			this.element = docFactory.createDocument().addElement(name, namespace);
+		public PacketExtension(String name, String @namespace)
+        {
+			this.element = new XElement(name, @namespace);
+            docFactory.Add(element);
 		}
 
 		/**
@@ -68,7 +71,8 @@ namespace org.xmpp.packet
      *
      * @param element the XML Element that contains the packet extension contents.
      */
-		public PacketExtension(Element element) {
+		public PacketExtension(XElement element)
+        {
 			this.element = element;
 		}
 
@@ -79,7 +83,7 @@ namespace org.xmpp.packet
      *
      * @return the DOM4J Element that represents the packet.
      */
-		public Element getElement() {
+		public XElement getElement() {
 			return element;
 		}
 
@@ -89,9 +93,9 @@ namespace org.xmpp.packet
      * @return a deep copy of this packet extension.
      */
 		public PacketExtension createCopy() {
-			Element copy = element.createCopy();
-			docFactory.createDocument().add(copy);
-			return new PacketExtension(element);
+			XElement copy = new XElement(element);
+			//TODO: docFactory.createDocument().add(copy);
+			return new PacketExtension(copy);
 		}
 	}
 }

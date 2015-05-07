@@ -1,5 +1,4 @@
-﻿using org.xmpp.util;
-// Copyright (C) 2004-2009 Jive Software. All rights reserved.
+﻿// Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using org.xmpp.util;
 using System;
 using System.Text;
 
@@ -309,8 +309,7 @@ namespace org.xmpp.packet
 		public static string domainprep(string domain)
         {
 			if (domain == null) {
-				throw new IllegalArgumentException(
-					"Argument 'domain' cannot be null.");
+                throw new ArgumentNullException("Argument 'domain' cannot be null.");
 			}
 
 			ValueWrapper<String> cachedResult = DOMAINPREP_CACHE.get(domain);
@@ -401,20 +400,18 @@ namespace org.xmpp.packet
 					answer = Stringprep.resourceprep(resource);
 					// Validate field is not greater than 1023 bytes. UTF-8
 					// characters use one to four bytes.
-					if (answer != null && answer.getBytes("UTF-8").length > 1023) {
-						throw new IllegalArgumentException("Resource cannot be larger "
-						                               + "than 1023 bytes. Size is "
-						                               + answer.getBytes("UTF-8").length + " bytes.");
+                    if (answer != null && Encoding.UTF8.GetByteCount(answer) > 1023)
+                    {
+                        throw new ArgumentOutOfRangeException(string.Format("Resource cannot be larger than 1023 bytes. Size is {0}", Encoding.UTF8.GetByteCount(answer)));
 					}
-				} catch (UnsupportedEncodingException ex) {
+				}
+                catch (UnsupportedEncodingException ex) {
 					throw new IllegalStateException("Unable to construct a JID resource.", ex);
 				} catch (Exception ex) {
 					// register the failure in the cache (TINDER-24)
 					RESOURCEPREP_CACHE.put(resource, new ValueWrapper<String>(
 						Representation.ILLEGAL));
-					throw new IllegalArgumentException(
-						"The input is not a valid JID resource: " + resource,
-						ex);
+                    throw new ArgumentException("The input is not a valid JID resource: " + resource, ex);
 				}
 
 				// Add the result to the cache. As most key/value pairs will contain
@@ -439,14 +436,11 @@ namespace org.xmpp.packet
 						break;
 
 					case ILLEGAL:
-						throw new IllegalArgumentException(
-							"The input is not a valid JID resource part: "
-							+ resource);
+                        throw new ArgumentException("The input is not a valid JID resource part: " + resource);
 
 					default:
 						// should not occur
-						throw new IllegalStateException(
-							"The implementation of JID#resourceprep(String) is broken.");
+                        throw new Exception("The implementation of JID#resourceprep(string) is broken.");
 				}
 			}
 
@@ -508,9 +502,11 @@ namespace org.xmpp.packet
      */
 		public JID(string node, string domain, string resource, bool skipStringprep)
         {
-			if (domain == null) {
-				throw new NullPointerException("Domain cannot be null");
-			}
+            if (domain == null)
+            {
+                throw new ArgumentNullException("Domain cannot be null");
+            }
+
 			if (skipStringprep) {
 				this.node = node;
 				this.domain = domain;
@@ -539,7 +535,7 @@ namespace org.xmpp.packet
 					if (resource != null) {
 						buf.Append("/").Append(resource);
 					}
-					throw new IllegalArgumentException("Illegal JID: " + buf.ToString(), e);
+                    throw new ArgumentException("Illegal JID: " + buf.ToString(), e);
 				}
 			}
 		}
@@ -551,7 +547,7 @@ namespace org.xmpp.packet
      * @param jid the textual JID representation.
      * @return a string array with the parsed node, domain and resource.
      */
-		static string[] getParts(string jid) {
+		internal static string[] getParts(string jid) {
 			string[] parts = new string[3];
 			string node = null , domain, resource;
 			if (jid == null) {
@@ -568,7 +564,7 @@ namespace org.xmpp.packet
 
 			// Domain
 			if (atIndex + 1 > jid.Length) {
-				throw new IllegalArgumentException("JID with empty domain not valid");
+                throw new ArgumentException("JID with empty domain not valid");
 			}
 			if (atIndex < 0) {
 				if (slashIndex > 0) {
@@ -655,7 +651,7 @@ namespace org.xmpp.packet
 	 */
 		public String toFullJID() {
 			if (this.resource == null) {
-				throw new IllegalStateException("This JID was instantiated "
+                throw new ArgumentException("This JID was instantiated "
 				                            + "without a resource identifier. A full "
 				                            + "JID representation is not available for: " + toString());
 			}
@@ -678,20 +674,23 @@ namespace org.xmpp.packet
      *
      * @return a String representation of the JID.
      */
-		public String toString() {
-			StringBuilder sb = new StringBuilder();
-			if (this.node != null) {
-				sb.Append(this.node);
-				sb.Append('@');
-			}
-			sb.append(this.domain);
-			if (this.resource != null) {
-				sb.Append('/');
-				sb.Append(this.resource);
-			}
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            if (this.node != null)
+            {
+                sb.Append(this.node);
+                sb.Append('@');
+            }
+            sb.Append(this.domain);
+            if (this.resource != null)
+            {
+                sb.Append('/');
+                sb.Append(this.resource);
+            }
 
-			return sb.ToString();
-		}
+            return sb.ToString();
+        }
 
 		public int hashCode() {
 			return ToString().GetHashCode();

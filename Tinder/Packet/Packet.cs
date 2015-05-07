@@ -1,5 +1,4 @@
-﻿using NLog;
-// Copyright (C) 2004-2009 Jive Software. All rights reserved.
+﻿// Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+using NLog;
 using System;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -35,9 +37,9 @@ namespace org.xmpp.packet
 	{
 		private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-		protected static readonly DocumentFactory docFactory = DocumentFactory.getInstance();
+		protected static readonly XDocument docFactory = new XDocument();
 
-		protected Element element;
+		protected XElement element;
 
 		// Cache to and from JIDs
 		protected JID toJID;
@@ -51,9 +53,9 @@ namespace org.xmpp.packet
      *
      * @param element the XML Element that contains the packet contents.
      */
-		public Packet(Element element) {
-			this(element, false);
-		}
+		public Packet(XElement element)
+            : this(element, false)
+        { }
 
 		/**
      * Constructs a new Packet. The JID address contained in the XML Element may not be
@@ -65,31 +67,31 @@ namespace org.xmpp.packet
      * @param element the XML Element that contains the packet contents.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public Packet(Element element, bool skipValidation) {
+		public Packet(XElement element, bool skipValidation) {
 			this.element = element;
 			// Apply stringprep profiles to the "to" and "from" values.
-			String to = element.attributeValue("to");
+			string to = element.Attribute("to").Value;
 			if (to != null) {
-				if (to.length() == 0) {
+				if (to.Length == 0) {
 					// Remove empty TO values
-					element.addAttribute("to", null);
+					element.SetAttributeValue("to", null);
 				}
 				else {
-					String[] parts = JID.getParts(to);
+					string[] parts = JID.getParts(to);
 					toJID = new JID(parts[0], parts[1], parts[2], skipValidation);
-					element.addAttribute("to", toJID.toString());
+					element.SetAttributeValue("to", toJID.toString());
 				}
 			}
-			String from = element.attributeValue("from");
+			string from = element.Attribute("from").Value;
 			if (from != null) {
-				if (from.length() == 0) {
+				if (from.Length == 0) {
 					// Remove empty FROM values
-					element.addAttribute("from", null);
+					element.SetAttributeValue("from", null);
 				}
 				else {
-					String[] parts = JID.getParts(from);
+					string[] parts = JID.getParts(from);
 					fromJID = new JID(parts[0], parts[1], parts[2], true);
-					element.addAttribute("from", fromJID.toString());
+					element.SetAttributeValue("from", fromJID.toString());
 				}
 			}
 		}
@@ -99,9 +101,8 @@ namespace org.xmpp.packet
      * extensions of this class that require a more optimized path for creating
      * new packets.
      */
-		protected Packet() {
-
-		}
+		protected Packet()
+        { }
 
 		/**
      * Returns the packet ID, or <tt>null</tt> if the packet does not have an ID.
@@ -109,8 +110,8 @@ namespace org.xmpp.packet
      *
      * @return the packet ID.
      */
-		public String getID() {
-			return element.attributeValue("id");
+		public string getID() {
+			return element.Attribute("id").Value;
 		}
 
 		/**
@@ -119,7 +120,7 @@ namespace org.xmpp.packet
      * @param ID the packet ID.
      */
 		public void setID(String ID) {
-			element.addAttribute("id", ID);
+            element.Add(new XAttribute("id", ID));
 		}
 
 		/**
@@ -131,12 +132,12 @@ namespace org.xmpp.packet
      *      if not set.
      */
 		public JID getTo() {
-			String to = element.attributeValue("to");
-			if (to == null || to.length() == 0) {
+			string to = element.Attribute("to").Value;
+			if (to == null || to.Length == 0) {
 				return null;
 			}
 			else {
-				if (toJID != null && to.equals(toJID.toString())) {
+				if (toJID != null && to.Equals(toJID.toString())) {
 					return toJID;
 				}
 				else {
@@ -165,7 +166,7 @@ namespace org.xmpp.packet
 			} else {
 				toJID = null;
 			}
-			element.addAttribute("to", to);
+			element.Add(new XAttribute("to", to));
 		}
 
 		/**
@@ -177,10 +178,10 @@ namespace org.xmpp.packet
 		public void setTo(JID to) {
 			toJID = to;
 			if (to == null) {
-				element.addAttribute("to", null);
+                element.Add(new XAttribute("to", null));
 			}
 			else {
-				element.addAttribute("to", to.toString());
+				element.Add(new XAttribute("to", to.ToString()));
 			}
 		}
 
@@ -193,12 +194,12 @@ namespace org.xmpp.packet
      *      if not set.
      */
 		public JID getFrom() {
-			String from = element.attributeValue("from");
-			if (from == null || from.length() == 0) {
+			String from = element.Attribute("from").Value;
+			if (from == null || from.Length == 0) {
 				return null;
 			}
 			else {
-				if (fromJID != null && from.equals(fromJID.toString())) {
+				if (fromJID != null && from.Equals(fromJID.ToString())) {
 					return fromJID;
 				}
 				else {
@@ -219,15 +220,15 @@ namespace org.xmpp.packet
      *
      * @param from the XMPP address (JID) that the packet comes from.
      */
-		public void setFrom(String from) {
+		public void setFrom(string from) {
 			// Apply stringprep profiles to value.
 			if (from != null) {
 				fromJID = new JID(from);
-				from = fromJID.toString();
+				from = fromJID.ToString();
 			} else {
 				fromJID = null;
 			}
-			element.addAttribute("from", from);
+			element.Add(new XAttribute("from", from));
 		}
 
 		/**
@@ -239,10 +240,10 @@ namespace org.xmpp.packet
 		public void setFrom(JID from) {
 			fromJID = from;
 			if (from == null) {
-				element.addAttribute("from", null);
+				element.Add(new XAttribute("from", null));
 			}
 			else {
-				element.addAttribute("from", from.toString());
+				element.Add(new XAttribute("from", from.ToString()));
 			}
 		}
 
@@ -256,7 +257,7 @@ namespace org.xmpp.packet
      * @param extension the PacketExtension whose element will be added to this Packet's element.
      */
 		public void addExtension(PacketExtension extension) {
-			element.add(extension.getElement());
+			element.Add(extension.getElement());
 		}
 
 		/**
@@ -269,19 +270,18 @@ namespace org.xmpp.packet
      * @return a PacketExtension on the first element found in this packet for the specified
      *         name and namespace or null if none was found.
      */
-		@SuppressWarnings("unchecked")
-		public PacketExtension getExtension(String name, String namespace) {
-			List<Element> extensions = element.elements(QName.get(name, namespace));
+		public PacketExtension getExtension(string name, string @namespace) {
+			List<XElement> extensions = element.Elements(QName.get(name, @namespace)).ToList();
 			if (!extensions.isEmpty()) {
-				Class<? extends PacketExtension> extensionClass = PacketExtension.getExtensionClass(name, namespace);
+				Class<? extends PacketExtension> extensionClass = PacketExtension.getExtensionClass(name, @namespace);
 				// If a specific PacketExtension implementation has been registered, use that.
 				if (extensionClass != null) {
 					try {
-						Constructor<? extends PacketExtension> constructor = extensionClass.getDeclaredConstructor(Element.class);
+						Constructor<? extends PacketExtension> constructor = extensionClass.getDeclaredConstructor(XElement.class);
 						return constructor.newInstance(extensions.get(0));
 					}
 					catch (Exception e) {
-						Log.warn("Packet extension (name "+name+", namespace "+namespace+") cannot be found.", e);
+						Log.warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
 					}
 				}
 				// Otherwise, use a normal PacketExtension.
@@ -305,9 +305,8 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return true if a child element was removed.
      */
-		@SuppressWarnings("unchecked")
-		public bool deleteExtension(String name, String namespace) {
-			List<Element> extensions = element.elements(QName.get(name, namespace));
+		public bool deleteExtension(string name, string @namespace) {
+			List<XElement> extensions = element.Elements(QName.get(name, @namespace)).ToList();
 			if (!extensions.isEmpty()) {
 				element.remove(extensions.get(0));
 				return true;
