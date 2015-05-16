@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -46,9 +47,9 @@ namespace org.xmpp.packet
      *
      * @param element the message Element.
      */
-		public Message(Element element) {
-			super(element);
-		}
+		public Message(XElement element)
+			: base(element)
+		{ }
 
 		/**
      * Constructs a new Message using an existing Element. This is useful
@@ -59,9 +60,9 @@ namespace org.xmpp.packet
      * @param element the message Element.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public Message(Element element, bool skipValidation) {
-			super(element, skipValidation);
-		}
+		public Message(XElement element, bool skipValidation)
+			: base(element, skipValidation)
+		{ }
 
 		/**
      * Constructs a new Message that is a copy of an existing Message.
@@ -69,8 +70,9 @@ namespace org.xmpp.packet
      * @param message the message packet.
      * @see #createCopy()
      */
-		private Message(Message message) {
-			Element elementCopy = message.element.createCopy();
+		private Message(Message message)
+		{
+			XElement elementCopy = message.element.createCopy();
 			docFactory.createDocument().add(elementCopy);
 			this.element = elementCopy;
 			// Copy cached JIDs (for performance reasons)
@@ -109,7 +111,7 @@ namespace org.xmpp.packet
      *
      * @return the subject.
      */
-		public String getSubject() {
+		public string getSubject() {
 			return element.elementText("subject");
 		}
 
@@ -119,7 +121,7 @@ namespace org.xmpp.packet
      * @param subject the subject.
      */
 		public void setSubject(String subject) {
-			Element subjectElement = element.element("subject");
+			XElement subjectElement = element.element("subject");
 			// If subject is null, clear the subject.
 			if (subject == null && subjectElement != null) {
 				element.remove(subjectElement);
@@ -140,7 +142,7 @@ namespace org.xmpp.packet
      *
      * @return the body.
      */
-		public String getBody() {
+		public string getBody() {
 			return element.elementText("body");
 		}
 
@@ -150,7 +152,7 @@ namespace org.xmpp.packet
      * @param body the body.
      */
 		public void setBody(String body) {
-			Element bodyElement = element.element("body");
+			XElement bodyElement = element.element("body");
 			// If body is null, clear the body.
 			if (body == null) {
 				if (bodyElement != null) {
@@ -172,7 +174,7 @@ namespace org.xmpp.packet
      *
      * @return the thread value.
      */
-		public String getThread() {
+		public string getThread() {
 			return element.elementText("thread");
 		}
 
@@ -183,8 +185,8 @@ namespace org.xmpp.packet
      *
      * @param thread thread value.
      */
-		public void setThread(String thread) {
-			Element threadElement = element.element("thread");
+		public void setThread(string thread) {
+			XElement threadElement = element.element("thread");
 			// If thread is null, clear the thread.
 			if (thread == null) {
 				if (threadElement != null) {
@@ -217,10 +219,10 @@ namespace org.xmpp.packet
      * @return the first matching child element, or <tt>null</tt> if there
      *      is no matching child element.
      */
-		public Element getChildElement(String name, String namespace) {
+		public XElement getChildElement(String name, String @namespace) {
 			for (Iterator<Element> i=element.elementIterator(name); i.hasNext(); ) {
-				Element element = i.next();
-				if (element.getNamespaceURI().equals(namespace)) {
+				XElement element = i.next();
+				if (element.getNamespaceURI().equals(@namespace)) {
 					return element;
 				}
 			}
@@ -244,8 +246,8 @@ namespace org.xmpp.packet
      * @param namespace the element namespace.
      * @return the newly created child element.
      */
-		public Element addChildElement(String name, String namespace) {
-			return element.addElement(name, namespace);
+		public XElement addChildElement(string name, string @namespace) {
+			return element.addElement(name, @namespace);
 		}
 
 		/**
@@ -272,7 +274,8 @@ namespace org.xmpp.packet
      *      <li>{@link #error Message.Type.error} -- indicates a messaging error.
      * </ul>
      */
-		public enum Type {
+		public enum Type
+		{
 
 			/**
          * (Default) a normal text message used in email like interface.
@@ -297,7 +300,7 @@ namespace org.xmpp.packet
 			/**
          * Indicates a messaging error.
          */
-			error;
+			error
 		}
 	}
 }

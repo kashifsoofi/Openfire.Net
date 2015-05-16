@@ -50,7 +50,7 @@ namespace org.xmpp.packet
      *
      * @param type the IQ type.
      */
-		public IQ(Type type) {
+		public IQ(IQ.Type type) {
 			this.element = docFactory.createDocument().addElement("iq");
 			setType(type);
 			String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
@@ -63,7 +63,7 @@ namespace org.xmpp.packet
      * @param ID the packet ID of the IQ.
      * @param type the IQ type.
      */
-		public IQ(Type type, String ID) {
+		public IQ(IQ.Type type, string ID) {
 			this.element = docFactory.createDocument().addElement("iq");
 			setType(type);
 			setID(ID);
@@ -75,9 +75,9 @@ namespace org.xmpp.packet
      *
      * @param element the IQ Element.
      */
-		public IQ(Element element) {
-			super(element);
-		}
+		public IQ(XElement element)
+			: base(element)
+		{ }
 
 		/**
      * Constructs a new IQ using an existing Element. This is useful
@@ -88,8 +88,9 @@ namespace org.xmpp.packet
      * @param element the IQ Element.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public IQ(Element element, bool skipValidation) {
-			super(element, skipValidation);
+		public IQ(XElement element, bool skipValidation)
+			: base(element, skipValidation)
+		{
 		}
 
 		/**
@@ -99,7 +100,7 @@ namespace org.xmpp.packet
      * @see #createCopy()
      */
 		private IQ(IQ iq) {
-			Element elementCopy = iq.element.createCopy();
+			XElement elementCopy = iq.element.createCopy();
 			docFactory.createDocument().add(elementCopy);
 			this.element = elementCopy;
 			// Copy cached JIDs (for performance reasons)
@@ -113,7 +114,7 @@ namespace org.xmpp.packet
      * @return the IQ type.
      * @see Type
      */
-		public Type getType() {
+		public IQ.Type getType() {
 			String type = element.attributeValue("type");
 			if (type != null) {
 				return Type.valueOf(type);
@@ -129,7 +130,7 @@ namespace org.xmpp.packet
      * @param type the IQ type.
      * @see Type
      */
-		public void setType(Type type) {
+		public void setType(IQ.Type type) {
 			element.addAttribute("type", type==null?null:type.ToString());
 		}
 

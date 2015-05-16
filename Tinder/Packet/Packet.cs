@@ -162,7 +162,7 @@ namespace org.xmpp.packet
 			// Apply stringprep profiles to value.
 			if (to !=  null) {
 				toJID = new JID(to);
-				to = toJID.toString();
+				to = toJID.ToString();
 			} else {
 				toJID = null;
 			}

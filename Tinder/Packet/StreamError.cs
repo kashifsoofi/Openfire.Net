@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -25,9 +26,9 @@ namespace org.xmpp.packet
 	{
 		private static readonly string ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-streams";
 
-		private static DocumentFactory docFactory = DocumentFactory.getInstance();
+		private static XDocument docFactory = new XDocument();
 
-		private Element element;
+		private XElement element;
 
 		/**
      * Construcs a new StreamError with the specified condition.
@@ -83,7 +84,6 @@ namespace org.xmpp.packet
      * @return the error condition.
      * @see Condition
      */
-		@SuppressWarnings("unchecked")
 		public Condition getCondition() {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 				Element el = i.next();
@@ -102,7 +102,6 @@ namespace org.xmpp.packet
      * @param condition the error condition.
      * @see Condition
      */
-		@SuppressWarnings("unchecked")
 		public void setCondition(Condition condition) {
 			if (condition == null) {
 				throw new NullPointerException("Condition cannot be null");
@@ -152,7 +151,7 @@ namespace org.xmpp.packet
      *      no language code.
      */
 		public void setText(String text, String language) {
-			Element textElement = element.element("text");
+			XElement textElement = element.element("text");
 			// If text is null, clear the text.
 			if (text == null) {
 				if (textElement != null) {
@@ -179,7 +178,7 @@ namespace org.xmpp.packet
      * @return the language code of the text description, if it exists.
      */
 		public String getTextLanguage() {
-			Element textElement = element.element("text");
+			XElement textElement = element.element("text");
 			if (textElement != null) {
 				return textElement.attributeValue(QName.get("lang", "xml",
 				                                        "http://www.w3.org/XML/1998/namespace"));
@@ -194,7 +193,7 @@ namespace org.xmpp.packet
      *
      * @return the DOM4J Element.
      */
-		public Element getElement() {
+		public XElement getElement() {
 			return element;
 		}
 
@@ -466,7 +465,7 @@ namespace org.xmpp.packet
 				}
 			}
 
-			private String value;
+			private string value;
 
 			private Condition(String value) {
 				this.value = value;

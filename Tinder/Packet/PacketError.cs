@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -25,9 +26,9 @@ namespace org.xmpp.packet
 	{
 		private static readonly string ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-stanzas";
 
-		private static DocumentFactory docFactory = DocumentFactory.getInstance();
+		private static XDocument docFactory = new XDocument();
 
-		private Element element;
+		private XElement element;
 
 		/**
      * Construcs a new PacketError with the specified condition. The error
@@ -36,7 +37,7 @@ namespace org.xmpp.packet
      * @param condition the error condition.
      */
 		public PacketError(Condition condition) {
-			this.element = docFactory.createElement("error");
+			this.element = new XElement("error");
 			setCondition(condition);
 			setType(condition.getDefaultType());
 		}
@@ -124,7 +125,6 @@ namespace org.xmpp.packet
      * @return the error condition.
      * @see Condition
      */
-		@SuppressWarnings("unchecked")
 		public Condition getCondition() {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 				Element el = i.next();
@@ -155,7 +155,6 @@ namespace org.xmpp.packet
      * @param condition the error condition.
      * @see Condition
      */
-		@SuppressWarnings("unchecked")
 		public void setCondition(Condition condition) {
 			if (condition == null) {
 				throw new NullPointerException("Condition cannot be null");
@@ -209,7 +208,7 @@ namespace org.xmpp.packet
      *      no language code.
      */
 		public void setText(String text, String lang) {
-			Element textElement = element.element("text");
+			XElement textElement = element.element("text");
 			// If text is null, clear the text.
 			if (text == null) {
 				if (textElement != null) {
@@ -236,7 +235,7 @@ namespace org.xmpp.packet
      * @return the language code of the text description, if it exists.
      */
 		public String getTextLang() {
-			Element textElement = element.element("text");
+			XElement textElement = element.element("text");
 			if (textElement != null) {
 				return textElement.attributeValue(QName.get("lang", "xml",
 				                                        "http://www.w3.org/XML/1998/namespace"));
@@ -261,23 +260,21 @@ namespace org.xmpp.packet
      * @param name the name of the application-specific error condition.
      * @param namespaceURI the namespace of the application.
      */
-		@SuppressWarnings("unchecked")
 		public void setApplicationCondition(String name, String namespaceURI) {
-			if (ERROR_NAMESPACE.equals(namespaceURI)) {
+			if (ERROR_NAMESPACE.Equals(namespaceURI)) {
 				throw new IllegalArgumentException();
 			}
 
-			Element applicationError = null;
+			XElement applicationError = null;
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 
-				Element el = i.next();
+				XElement el = i.next();
 				if (!el.getNamespaceURI().equals(ERROR_NAMESPACE))
 				{
 					applicationError = el;
 				}
 			}
-
-			if (applicationError != null) {
+	if (applicationError != null) {
 				element.remove(applicationError);
 			}
 
@@ -300,7 +297,6 @@ namespace org.xmpp.packet
      *
      * @return the name of the application-specific error condition, if it exists.
      */
-		@SuppressWarnings("unchecked")
 		public String getApplicationConditionName() {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 				Element el = i.next();
@@ -318,7 +314,6 @@ namespace org.xmpp.packet
      *
      * @return the namespace of the application-specific error condition, if it exists.
      */
-		@SuppressWarnings("unchecked")
 		public String getApplicationConditionNamespaceURI() {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
 				Element el = i.next();
@@ -337,7 +332,7 @@ namespace org.xmpp.packet
      *
      * @return the DOM4J Element.
      */
-		public Element getElement() {
+		public XElement getElement() {
 			return element;
 		}
 
@@ -346,11 +341,12 @@ namespace org.xmpp.packet
      *
      * @return the textual XML representation of this error.
      */
-		public String toXML() {
+		public string toXML() {
 			return element.asXML();
 		}
 
-		public String toString() {
+		public override string ToString()
+		{
 			StringWriter out = new StringWriter();
 			XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
 			try {

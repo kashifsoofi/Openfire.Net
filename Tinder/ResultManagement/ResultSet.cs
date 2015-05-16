@@ -99,7 +99,7 @@ namespace org.xmpp.resultsetmangement
 	 *             if the result does not exist in the result set.
 	 * 
 	 */
-		public List<T> getBefore(E result, int maxAmount) {
+		public List<T> getBefore(T result, int maxAmount) {
 			return getBefore(result.getUID(), maxAmount);
 		}
 
@@ -151,7 +151,7 @@ namespace org.xmpp.resultsetmangement
 	 *            Index of the element to be returned
 	 * @return the Element at 'index'.
 	 */
-		public abstract E get(int index);
+		public abstract T get(int index);
 
 		/**
 	 * Returns a list of results, starting with the result that's at the
@@ -202,7 +202,7 @@ namespace org.xmpp.resultsetmangement
 	 *            The element to search for
 	 * @return The index of the element.
 	 */
-		public int indexOf(E element) {
+		public int indexOf(T element) {
 			return indexOf(element.getUID());
 		}
 
@@ -351,7 +351,7 @@ namespace org.xmpp.resultsetmangement
 				return false;
 			}
 
-			final String sMax = maxElement.getText();
+			string sMax = maxElement.getText();
 			if (sMax == null || sMax.length() == 0) {
 				// max element must contain a value.
 				return false;
@@ -370,7 +370,7 @@ namespace org.xmpp.resultsetmangement
 			List<Element> allElements = rsmElement.elements();
 			int optionalElements = 0;
 			for (Element element : allElements) {
-				final String name = element.getName();
+				string name = element.getName();
 				if (!validRequestFields.contains(name)) {
 					// invalid element.
 					return false;
@@ -386,7 +386,7 @@ namespace org.xmpp.resultsetmangement
 				}
 
 				if (name.equals("index")) {
-					final String value = element.getText();
+					string value = element.getText();
 					if (value == null || value.equals("")) {
 						// index elements must have a numberic value.
 						return false;

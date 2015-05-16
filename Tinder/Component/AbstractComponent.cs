@@ -73,17 +73,17 @@ namespace org.xmpp.component
 
 		/// The 'XMPP Ping' namespace
 		/// @see <a href="http://xmpp.org/extensions/xep-0199.html">XEP-0199</a>
-		public static readonly NAMESPACE_XMPP_PING = "urn:xmpp:ping";
+		public static readonly string NAMESPACE_XMPP_PING = "urn:xmpp:ping";
 
 		/// The 'Last Activity' namespace
 		/// @see <a href="http://xmpp.org/extensions/xep-0012.html">XEP-0012</a>
 		public static readonly string NAMESPACE_LAST_ACTIVITY = "jabber:iq:last";
 
-		* The 'Entity Time' namespace
+		/* The 'Entity Time' namespace
 		* 
 		* @see <a href="http://xmpp.org/extensions/xep-0202.html">XEP-0202</a>
 			*/
-			public static final String NAMESPACE_ENTITY_TIME = "urn:xmpp:time";
+		public static readonly string NAMESPACE_ENTITY_TIME = "urn:xmpp:time";
 
 		/**
 	 * The component manager to which this Component has been registered.
@@ -103,19 +103,19 @@ namespace org.xmpp.component
 		/**
 	 * The maximum number of threads that will process work for this component.
 	 */
-		private final int maxThreadPoolSize;
+		private readonly int maxThreadPoolSize;
 
 		/**
 	 * Capacity of the queue that holds tasks that are to be executed by the
 	 * thread pool.
 	 */
-		private final int maxQueueSize;
+		private readonly int maxQueueSize;
 
 		/**
 	 * if <tt>true</tt>, the component will make sure that every request that is
 	 * received is answered, as specified by the XMPP specification.
 	 */
-		private final bool enforceIQResult;
+		private readonly bool enforceIQResult;
 
 		/**
 	 * The timestamp (in milliseconds) when the component was last (re)started. 
@@ -157,8 +157,8 @@ namespace org.xmpp.component
 	 * @see org.xmpp.component.Component#initialize(org.xmpp.packet.JID,
 	 *      org.xmpp.component.ComponentManager)
 	 */
-		public final void initialize(final JID jid, final ComponentManager componentManager)
-		throws ComponentException {
+		public sealed void initialize(JID jid, ComponentManager componentManager)
+		{
 			compMan = componentManager;
 			this.jid = jid;
 
@@ -169,15 +169,19 @@ namespace org.xmpp.component
 		/**
 	 * @see org.xmpp.component.Component#processPacket(org.xmpp.packet.Packet)
 	 */
-		final public void processPacket(final Packet packet) {
-			final Packet copy = packet.createCopy();
+		public sealed void processPacket(Packet packet)
+		{
+			Packet copy = packet.createCopy();
 
 			if (executor == null) {
 
 			}
-			try {
+			try
+			{
 				executor.execute(new PacketProcessor(copy));
-			} catch (RejectedExecutionException ex) {
+			}
+			catch (RejectedExecutionException ex)
+			{
 				log.error("(serving component '" + getName()
 				      + "') Unable to process packet! "
 				      + "Is the thread pool queue exhausted? "
@@ -185,8 +189,8 @@ namespace org.xmpp.component
 				      + "'. Packet that's dropped: " + packet.toXML(), ex);
 				// If the original packet was an IQ request, we should return an
 				// error.
-				if (packet instanceof IQ && ((IQ) packet).isRequest()) {
-					final IQ response = IQ.createResultIQ((IQ) packet);
+				if (packet is IQ && ((IQ) packet).isRequest()) {
+					IQ response = IQ.createResultIQ((IQ) packet);
 					response.setError(Condition.internal_server_error);
 					send(response);
 				}
@@ -200,12 +204,18 @@ namespace org.xmpp.component
 	 * @param packet
 	 *            The stanza that will be processed.
 	 */
-		final private void processQueuedPacket(final Packet packet) {
-			if (packet instanceof IQ) {
+		private sealed void processQueuedPacket(Packet packet)
+		{
+			if (packet is IQ)
+			{
 				processIQ((IQ) packet);
-			} else if (packet instanceof Message) {
+			}
+			else if (packet is Message)
+			{
 				processMessage((Message) packet);
-			} else if (packet instanceof Presence) {
+			}
+			else if (packet is Presence)
+			{
 				processPresence((Presence) packet);
 			}
 		}
@@ -238,12 +248,13 @@ namespace org.xmpp.component
 	 * @param iq
 	 *            The IQ stanza that was received by this component.
 	 */
-		final private void processIQ(final IQ iq) {
+		private sealed void processIQ(IQ iq)
+		{
 			log.debug("(serving component '{}') Processing IQ (packetId {}): {}",
 			      new Object[] {getName(), iq.getID(), iq.toXML() });
 
 			IQ response = null;
-			final Type type = iq.getType();
+			Type type = iq.getType();
 			try {
 				switch (type) {
 
@@ -251,7 +262,7 @@ namespace org.xmpp.component
 					case set:
 						// cache the id, to prevent the extending implementation from
 						// modifying it.
-						final String requestID = iq.getID();
+						String requestID = iq.getID();
 						response = processIQRequest(iq);
 						// validate the response IQ stanza.
 						if (response == null) {
@@ -340,7 +351,7 @@ namespace org.xmpp.component
 	 * @param message
 	 *            The message stanza to process.
 	 */
-		final private void processMessage(Message message) {
+		private sealed void processMessage(Message message) {
 			log.trace("(serving component '{}') Processing message stanza: {}",
 			      getName(), message.toXML());
 			if (servesLocalUsersOnly() && !sentByLocalEntity(message)) {
@@ -364,7 +375,7 @@ namespace org.xmpp.component
 	 * @param message
 	 *            The presence stanza to process.
 	 */
-		final private void processPresence(Presence presence) {
+		private sealed void processPresence(Presence presence) {
 			log.trace("(serving component '{}') Processing presence stanza: {}",
 			      getName(), presence.toXML());
 			if (servesLocalUsersOnly() && !sentByLocalEntity(presence)) {
@@ -415,22 +426,23 @@ namespace org.xmpp.component
 	 * @return Response to the request, or null to indicate a
 	 *         'feature-not-implemented' error.
 	 */
-		final private IQ processIQRequest(IQ iq) throws Exception {
+		private sealed IQ processIQRequest(IQ iq)
+		{
 			log.debug("(serving component '{}') Processing IQ "
 			      + "request (packetId {}).", getName(), iq.getID());
 
 			// IQ get (and set) stanza's MUST be replied to.
-			final Element childElement = iq.getChildElement();
-			String namespace = null;
+			Element childElement = iq.getChildElement();
+			string @namespace = null;
 			if (childElement != null) {
-				namespace = childElement.getNamespaceURI();
+				@namespace = childElement.getNamespaceURI();
 			}
-			if (namespace == null) {
+			if (@namespace == null) {
 				log.debug("(serving component '{}') Invalid XMPP "
 				      + "- no child element or namespace in IQ "
 				      + "request (packetId {})", getName(), iq.getID());
 				// this isn't valid XMPP.
-				final IQ response = IQ.createResultIQ(iq);
+				IQ response = IQ.createResultIQ(iq);
 				response.setError(Condition.bad_request);
 				return response;
 			}
@@ -442,33 +454,33 @@ namespace org.xmpp.component
 				log.debug("(serving component '{}') Returning "
 				      + "'not-authorized' IQ error to a user from "
 				      + "another domain: {}", getName(), iq.toXML());
-				final IQ error = IQ.createResultIQ(iq);
+				IQ error = IQ.createResultIQ(iq);
 				error.setError(Condition.not_authorized);
 				return error;
 			}
-			final Type type = iq.getType();
+			Type type = iq.getType();
 			if (type == Type.get) {
-				if (NAMESPACE_DISCO_INFO.equals(namespace)) {
+				if (NAMESPACE_DISCO_INFO.equals(@namespace)) {
 					log.trace("(serving component '{}') "
 					      + "Calling #handleDiscoInfo() (packetId {}).",
 					      getName(), iq.getID());
 					return handleDiscoInfo(iq);
-				} else if (NAMESPACE_DISCO_ITEMS.equals(namespace)) {
+				} else if (NAMESPACE_DISCO_ITEMS.equals(@namespace)) {
 					log.trace("(serving component '{}') "
 					      + "Calling #handleDiscoItems() (packetId {}).",
 					      getName(), iq.getID());
 					return handleDiscoItems(iq);
-				} else if (NAMESPACE_XMPP_PING.equals(namespace)) {
+				} else if (NAMESPACE_XMPP_PING.equals(@namespace)) {
 					log.trace("(serving component '{}') "
 					      + "Calling #handlePing() (packetId {}).", getName(), iq
 					      .getID());
 					return handlePing(iq);
-				} else if (NAMESPACE_LAST_ACTIVITY.equals(namespace)) {
+				} else if (NAMESPACE_LAST_ACTIVITY.equals(@namespace)) {
 					log.trace("(serving component '{}') "
 					      + "Calling #handleLastActivity() (packetId {}).", getName(), iq
 					      .getID());
 					return handleLastActivity(iq);
-				} else if (NAMESPACE_ENTITY_TIME.equals(namespace)) {
+				} else if (NAMESPACE_ENTITY_TIME.equals(@namespace)) {
 					log.trace("(serving component '{}') "
 					      + "Calling #handleEntityTime() (packetId {}).", getName(), iq
 					      .getID());
@@ -495,7 +507,8 @@ namespace org.xmpp.component
 	 *            The IQ stanza of type <tt>result</tt> that was received by
 	 *            this component.
 	 */
-		protected void handleIQResult(IQ iq) {
+		protected virtual void handleIQResult(IQ iq)
+		{
 			// Doesn't do anything. Override this method to process IQ result
 			// stanzas.
 		}
@@ -509,7 +522,8 @@ namespace org.xmpp.component
 	 *            The IQ stanza of type <tt>error</tt> that was received by this
 	 *            component.
 	 */
-		protected void handleIQError(IQ iq) {
+		protected virtual void handleIQError(IQ iq)
+		{
 			// Doesn't do anything. Override this method to process IQ error
 			// stanzas.
 			log.info("(serving component '{}') IQ stanza "
@@ -539,7 +553,8 @@ namespace org.xmpp.component
 	 * @return the response the to request stanza, or <tt>null</tt> to indicate
 	 *         'feature-not-available'.
 	 */
-		protected IQ handleIQGet(IQ iq) throws Exception {
+		protected virtual IQ handleIQGet(IQ iq)
+		{
 			// Doesn't do anything. Override this method to process IQ get
 			// stanzas.
 			return null;
@@ -568,7 +583,8 @@ namespace org.xmpp.component
 	 * @return the response the to request stanza, or <tt>null</tt> to indicate
 	 *         'feature-not-available'.
 	 */
-		protected IQ handleIQSet(IQ iq) throws Exception {
+		protected virtual IQ handleIQSet(IQ iq)
+		{
 			// Doesn't do anything. Override this method to process IQ set
 			// stanzas.
 			return null;
@@ -584,7 +600,8 @@ namespace org.xmpp.component
 	 *            The Service Discovery Items
 	 * @return Service Discovery Items response.
 	 */
-		protected IQ handleDiscoItems(IQ iq) {
+		protected virtual IQ handleDiscoItems(IQ iq)
+		{
 			return null;
 		}
 
@@ -617,9 +634,10 @@ namespace org.xmpp.component
 	 *            The Service Discovery 'info' request stanza.
 	 * @return A response to the received Service Discovery 'info' request.
 	 */
-		protected IQ handleDiscoInfo(IQ iq) {
-			final IQ replyPacket = IQ.createResultIQ(iq);
-			final Element responseElement = replyPacket.setChildElement("query",
+		protected IQ handleDiscoInfo(IQ iq)
+		{
+			IQ replyPacket = IQ.createResultIQ(iq);
+			Element responseElement = replyPacket.setChildElement("query",
 			                                                        NAMESPACE_DISCO_INFO);
 
 			// identity
@@ -636,7 +654,7 @@ namespace org.xmpp.component
 			                                               NAMESPACE_LAST_ACTIVITY);
 			responseElement.addElement("feature").addAttribute("var",
 			                                               NAMESPACE_ENTITY_TIME);
-			for (final String feature : discoInfoFeatureNamespaces()) {
+			foreach (string feature in discoInfoFeatureNamespaces()) {
 				responseElement.addElement("feature").addAttribute("var", feature);
 			}
 			return replyPacket;
@@ -651,7 +669,8 @@ namespace org.xmpp.component
 	 *            The Ping request stanza.
 	 * @return The XMPP way of saying 'pong'.
 	 */
-		protected IQ handlePing(IQ iq) {
+		protected virtual IQ handlePing(IQ iq)
+		{
 			return IQ.createResultIQ(iq);
 		}
 
@@ -665,9 +684,10 @@ namespace org.xmpp.component
 	 * @return Last Activity response that reports back the uptime of this
 	 *         component.
 	 */
-		protected IQ handleLastActivity(IQ iq) {
-			final long uptime = (System.currentTimeMillis() - lastStartMillis) / 1000;
-			final IQ result = IQ.createResultIQ(iq);
+		protected virtual IQ handleLastActivity(IQ iq)
+		{
+			long uptime = (System.currentTimeMillis() - lastStartMillis) / 1000;
+			IQ result = IQ.createResultIQ(iq);
 			result.setChildElement("query", NAMESPACE_LAST_ACTIVITY).addAttribute(
 				"seconds", Long.toString(uptime));
 			return result;
@@ -681,17 +701,18 @@ namespace org.xmpp.component
 	 *            Entity Time request stanza.
 	 * @return Result stanza including the local current time.
 	 */
-		protected IQ handleEntityTime(IQ iq) {
-			final Date now = new Date();
-			final SimpleDateFormat sdf = new SimpleDateFormat(XMPPConstants.XMPP_DATETIME_FORMAT);
-			final SimpleDateFormat sdf_timezone = new SimpleDateFormat("Z");
+		protected virtual IQ handleEntityTime(IQ iq)
+		{
+			Date now = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat(XMPPConstants.XMPP_DATETIME_FORMAT);
+			SimpleDateFormat sdf_timezone = new SimpleDateFormat("Z");
 
-			final String utc = sdf.format(now);
-			final String tz = sdf_timezone.format(new Date());
-			final String tzo = new StringBuilder(tz).insert(3, ':').toString();
+			String utc = sdf.format(now);
+			String tz = sdf_timezone.format(new Date());
+			String tzo = new StringBuilder(tz).insert(3, ':').toString();
 
-			final IQ result = IQ.createResultIQ(iq);
-			final Element el = result.setChildElement("time", NAMESPACE_ENTITY_TIME);
+			IQ result = IQ.createResultIQ(iq);
+			Element el = result.setChildElement("time", NAMESPACE_ENTITY_TIME);
 			el.addElement("tzo").setText(tzo);
 			el.addElement("utc").setText(utc);
 			return result;
@@ -793,7 +814,8 @@ namespace org.xmpp.component
 	 * @param message
 	 *            The Message stanza that was received by this component.
 	 */
-		protected void handleMessage(final Message message) {
+		protected virtual void handleMessage(Message message)
+		{
 			// Doesn't do anything. Override this method to process messages.
 		}
 
@@ -805,7 +827,8 @@ namespace org.xmpp.component
 	 * @param presence
 	 *            The Presence stanza that was received by this component.
 	 */
-		protected void handlePresence(final Presence presence) {
+		protected virtual void handlePresence(Presence presence)
+		{
 			// Doesn't do anything. Override this method to process messages.
 		}
 
@@ -828,7 +851,8 @@ namespace org.xmpp.component
 	 * @return <tt>true</tt> if this component serves local users only, <tt>
 	 *         false</tt> otherwise.
 	 */
-		public bool servesLocalUsersOnly() {
+		public virtual bool servesLocalUsersOnly()
+		{
 			return false;
 		}
 
@@ -836,7 +860,8 @@ namespace org.xmpp.component
 	 * Default implementation of the shutdown() method of the {@link Component}
 	 * interface.
 	 */
-		public final void shutdown() {
+		public sealed void shutdown()
+		{
 			preComponentShutdown();
 			closeQueue();
 			postComponentShutdown();
@@ -848,7 +873,8 @@ namespace org.xmpp.component
 	 * 'recipient-unavailable' error, to indicate that this component is
 	 * temporarily unavailable.
 	 */
-		private void closeQueue() {
+		private void closeQueue()
+		{
 			log.debug("Closing queue...");
 			/*
 		 * This method gets called as part of the Component#shutdown() routine.
@@ -859,16 +885,16 @@ namespace org.xmpp.component
 			executor.shutdown();
 			try {
 				if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
-					final List<Runnable> wasAwatingExecution = executor
+					List<Runnable> wasAwatingExecution = executor
 						.shutdownNow();
-					for (final Runnable abortMe : wasAwatingExecution) {
-						final Packet packet = ((PacketProcessor) abortMe).packet;
-						if (packet instanceof IQ) {
-							final IQ iq = (IQ) packet;
+					foreach (Runnable abortMe in wasAwatingExecution) {
+						Packet packet = ((PacketProcessor) abortMe).packet;
+						if (packet is IQ) {
+							IQ iq = (IQ) packet;
 							if (iq.isRequest()) {
 								log.debug("Responding 'service unavailable' to "
 								      + "unprocessed stanza: {}", iq.toXML());
-								final IQ error = IQ.createResultIQ(iq);
+								IQ error = IQ.createResultIQ(iq);
 								error.setError(Condition.service_unavailable);
 								send(error);
 							}
@@ -886,7 +912,8 @@ namespace org.xmpp.component
 	 * @param packet
 	 *            The packet to send.
 	 */
-		protected void send(Packet packet) {
+		protected void send(Packet packet)
+		{
 			try {
 				compMan.sendPacket(this, packet);
 			} catch (ComponentException e) {
@@ -901,7 +928,8 @@ namespace org.xmpp.component
 	 * enables extending classes to initiate a cleanup before the component gets
 	 * completely shut down.
 	 */
-		public void preComponentShutdown() {
+		public void preComponentShutdown()
+		{
 			// Doesn't do anything. Override this method to process messages.
 		}
 
@@ -911,7 +939,8 @@ namespace org.xmpp.component
 	 * enables extending classes to finish cleaning up after all other cleanup
 	 * has been performed.
 	 */
-		public void postComponentShutdown() {
+		public void postComponentShutdown()
+		{
 			// Doesn't do anything. Override this method to process messages.
 		}
 
@@ -921,7 +950,8 @@ namespace org.xmpp.component
 	 * called once for each host that we connect to, so we have to take care to
 	 * avoid double initialization.
 	 */
-		public void start() {
+		public void start()
+		{
 			preComponentStart();
 
 			// reset the 'last activity' timestamp.
@@ -948,7 +978,8 @@ namespace org.xmpp.component
 	 * gets completely started. This method is called once for each host that we
 	 * connect to, so we have to take care to avoid double initialization.
 	 */
-		public void preComponentStart() {
+		public virtual void preComponentStart()
+		{
 			// Doesn't do anything. Override this method to process messages.
 		}
 
@@ -960,7 +991,8 @@ namespace org.xmpp.component
 	 * host that we connect to, so we have to take care to avoid double
 	 * initialization.
 	 */
-		public void postComponentStart() {
+		public virtual void postComponentStart()
+		{
 			// Doesn't do anything. Override this method to process messages.
 		}
 
@@ -976,12 +1008,13 @@ namespace org.xmpp.component
 	 * @return <tt>true</tt> if the stanza was sent by something inside the
 	 *         local XMPP domain, <tt>false</tt> otherwise.
 	 */
-		private bool sentByLocalEntity(final Packet packet) {
-			final JID from = packet.getFrom();
+		private bool sentByLocalEntity(Packet packet)
+		{
+			JID from = packet.getFrom();
 			if (from == null) {
 				return true;
 			}
-			final String domain = from.getDomain();
+			string domain = from.getDomain();
 			return (domain.equals(getDomain()) || domain
 			    .endsWith("." + getDomain()));
 		}
@@ -992,11 +1025,12 @@ namespace org.xmpp.component
 	 * 
 	 * @author Guus der Kinderen, guus.der.kinderen@gmail.com
 	 */
-		private class PacketProcessor implements Runnable {
+		private class PacketProcessor implements Runnable
+		{
 			/**
 		 * The packet to be processed.
 		 */
-			private final Packet packet;
+			private readonly Packet packet;
 
 			/**
 		 * Creates a new wrapper for a Packet.
@@ -1004,7 +1038,8 @@ namespace org.xmpp.component
 		 * @param packet
 		 *            the Packet to be processed.
 		 */
-			public PacketProcessor(final Packet packet) {
+			public PacketProcessor(Packet packet)
+			{
 				this.packet = packet;
 			}
 
@@ -1013,7 +1048,8 @@ namespace org.xmpp.component
 		 * 
 		 * @see java.lang.Runnable#run()
 		 */
-			public void run() {
+			public void run()
+			{
 				processQueuedPacket(packet);
 			}
 		}

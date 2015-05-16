@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -50,9 +51,9 @@ namespace org.xmpp.packet
      *
      * @param element the presence Element.
      */
-		public Presence(Element element) {
-			super(element);
-		}
+		public Presence(XElement element)
+			: base(element)
+		{ }
 
 		/**
      * Constructs a new Presence using an existing Element. This is useful
@@ -63,9 +64,9 @@ namespace org.xmpp.packet
      * @param element the Presence Element.
      * @param skipValidation true if stringprep should not be applied to the TO address.
      */
-		public Presence(Element element, bool skipValidation) {
-			super(element, skipValidation);
-		}
+		public Presence(XElement element, bool skipValidation)
+			: base(element, skipValidation)
+		{ }
 
 		/**
      * Constructs a new Presence that is a copy of an existing Presence.
@@ -73,8 +74,9 @@ namespace org.xmpp.packet
      * @param presence the presence packet.
      * @see #createCopy() 
      */
-		private Presence(Presence presence) {
-			Element elementCopy = presence.element.createCopy();
+		private Presence(Presence presence)
+		{
+			XElement elementCopy = presence.element.createCopy();
 			docFactory.createDocument().add(elementCopy);
 			this.element = elementCopy;
 			// Copy cached JIDs (for performance reasons)

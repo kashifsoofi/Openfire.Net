@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.packet
 {
@@ -29,8 +30,9 @@ namespace org.xmpp.packet
      * Constructs a new Roster with an automatically generated ID and a type
      * of {@link IQ.Type#get}.
      */
-		public Roster() {
-			super();
+		public Roster()
+			:base()
+		{
 			element.addElement("query", "jabber:iq:roster");
 		}
 
@@ -40,8 +42,9 @@ namespace org.xmpp.packet
      *
      * @param type the IQ type.
      */
-		public Roster(Type type) {
-			super(type);
+		public Roster(IQ.Type type)
+			: base(type)
+		{
 			element.addElement("query", "jabber:iq:roster");
 		}
 
@@ -51,8 +54,9 @@ namespace org.xmpp.packet
      * @param type the IQ type.
      * @param ID the packet ID of the IQ.
      */
-		public Roster(Type type, String ID) {
-			super(type, ID);
+		public Roster(IQ.Type type, string ID)
+			: base(type, ID)
+		{
 			element.addElement("query", "jabber:iq:roster");
 		}
 
@@ -63,7 +67,7 @@ namespace org.xmpp.packet
      * @see #createCopy()
      */
 		private Roster(Roster roster) {
-			Element elementCopy = roster.element.createCopy();
+			XElement elementCopy = roster.element.createCopy();
 			docFactory.createDocument().add(elementCopy);
 			this.element = elementCopy;
 		}
@@ -74,8 +78,9 @@ namespace org.xmpp.packet
      *
      * @param element the Roster Element.
      */
-		public Roster(Element element) {
-			super(element);
+		public Roster(XElement element)
+			: base(element)
+		{
 		}
 
 		/**
@@ -175,7 +180,7 @@ namespace org.xmpp.packet
 			}
 			// Add in groups.
 			if (groups != null) {
-				for (String group : groups) {
+				foreach (string group in groups) {
 					item.addElement("group").setText(group);
 				}
 			}
@@ -188,10 +193,10 @@ namespace org.xmpp.packet
      * @param jid the JID of the item to remove.
      */
 		public void removeItem(JID jid) {
-			Element query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
+			XElement query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
 			if (query != null) {
 				for (Iterator<Element> i=query.elementIterator("item"); i.hasNext(); ) {
-					Element item = i.next();
+					XElement item = i.next();
 					if (item.attributeValue("jid").equals(jid.toString())) {
 						query.remove(item);
 						return;
@@ -207,7 +212,7 @@ namespace org.xmpp.packet
      */
 		public Collection<Item> getItems() {
 			Collection<Item> items = new ArrayList<Item>();
-			Element query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
+			XElement query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
 			if (query != null) {
 				for (Iterator<Element> i=query.elementIterator("item"); i.hasNext(); ) {
 					Element item = i.next();
