@@ -1,20 +1,11 @@
 ﻿<Properties StartupItem="Tinder/Tinder.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Tinder.Test/Forms/DataFormAddingFieldsTest.cs">
-    <Files>
-      <File FileName="Tinder.Test/Forms/DataFormAddingFieldsTest.cs" Line="7" Column="1" />
-    </Files>
+  <MonoDevelop.Ide.Workbench>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Openfire" expanded="True">
-            <Node name="Tinder" expanded="True">
-              <Node name="Util" expanded="True" />
-            </Node>
-            <Node name="Tinder.Test" expanded="True" selected="True">
-              <Node name="Component" expanded="True" />
-              <Node name="Forms" expanded="True" />
-            </Node>
+            <Node name="Tinder.Test" expanded="True" selected="True" />
           </Node>
         </State>
       </Pad>
