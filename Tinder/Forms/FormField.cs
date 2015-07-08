@@ -402,8 +402,8 @@ namespace org.xmpp.forms
 				if (bool_type.toXMPP().equals(type)) {
 					return bool_type;
 				}
-				else if (fixed.toXMPP().equals(type)) {
-					return fixed;
+				else if (@fixed.toXMPP().equals(type)) {
+					return @fixed;
 				}
 				else if (hidden.toXMPP().equals(type)) {
 					return hidden;

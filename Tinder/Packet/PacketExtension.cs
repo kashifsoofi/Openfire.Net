@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Xml.Linq;
 
 namespace org.xmpp.packet
@@ -37,7 +39,7 @@ namespace org.xmpp.packet
      * Subclasses of PacketExtension should register the element name and namespace that the
      * subclass is using.
      */
-		protected static readonly Map<QName, Class<? extends PacketExtension>> registeredExtensions = new ConcurrentHashMap<QName, Class<? extends PacketExtension>>();
+		protected static readonly Dictionary<QName, Type> registeredExtensions = new ConcurrentDictionary<QName, Type>();
 
 		protected XElement element;
 
@@ -50,8 +52,8 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return the extension class to use for the specified element name and namespace.
      */
-		public static Class<? extends PacketExtension> getExtensionClass(String name, String @namespace) {
-			return registeredExtensions.get(QName.get(name, @namespace));
+		public static Type getExtensionClass(String name, String @namespace) {
+			return registeredExtensions[QName.get(name, @namespace)];
 		}
 
 		/**

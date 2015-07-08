@@ -167,8 +167,8 @@ namespace org.xmpp.packet
      *
      * @return the child element.
      */
-		public Element getChildElement() {
-			List<Element> elements = element.elements();
+		public XElement getChildElement() {
+			List<XElement> elements = element.Elements().ToList();
 			if (elements.isEmpty()) {
 				return null;
 			}
@@ -176,9 +176,9 @@ namespace org.xmpp.packet
 				// Search for a child element that is in a different namespace.
 				for (int i=0; i<elements.size(); i++) {
 					Element element = elements.get(i);
-					String namespace = element.getNamespaceURI();
-					if (!namespace.equals("") && !namespace.equals("jabber:client") &&
-					!namespace.equals("jabber:server"))
+					String @namespace = element.getNamespaceURI();
+					if (!@namespace.equals("") && !@namespace.equals("jabber:client") &&
+					!@namespace.equals("jabber:server"))
 					{
 						return element;
 					}
@@ -282,15 +282,15 @@ namespace org.xmpp.packet
      * @return a PacketExtension on the first element found in this packet for the specified
      *         name and namespace or <tt>null</tt> if none was found.
      */
-		public PacketExtension getExtension(String name, String namespace) {
-			Element childElement = getChildElement();
+		public PacketExtension getExtension(String name, String @namespace) {
+			XElement childElement = getChildElement();
 			if (childElement == null) {
 				return null;
 			}
 			// Search for extensions in the child element
-			List<Element> extensions = childElement.elements(QName.get(name, namespace));
+			List<XElement> extensions = childElement.elements(QName.get(name, @namespace));
 			if (!extensions.isEmpty()) {
-				Class<? extends PacketExtension> extensionClass = PacketExtension.getExtensionClass(name, namespace);
+				Type extensionClass = PacketExtension.getExtensionClass(name, @namespace);
 				if (extensionClass != null) {
 					try {
 						Constructor<? extends PacketExtension> constructor = extensionClass.getDeclaredConstructor(new Class[]{
@@ -299,7 +299,7 @@ namespace org.xmpp.packet
 							extensions.get(0)});
 					}
 					catch (Exception e) {
-						Log.warn("Packet extension (name "+name+", namespace "+namespace+") cannot be found.", e);
+						Log.warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
 					}
 				}
 			}
@@ -323,13 +323,13 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return true if a child element was removed.
      */
-		public bool deleteExtension(String name, String namespace) {
+		public bool deleteExtension(String name, String @namespace) {
 			Element childElement = getChildElement();
 			if (childElement == null) {
 				return false;
 			}
 			// Delete extensions in the child element
-			List<Element> extensions = childElement.elements(QName.get(name, namespace));
+			List<XElement> extensions = childElement.Elements(QName.get(name, @namespace));
 			if (!extensions.isEmpty()) {
 				childElement.remove(extensions.get(0));
 				return true;
