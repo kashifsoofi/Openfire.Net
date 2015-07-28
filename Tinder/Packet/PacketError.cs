@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.IO;
 using System.Xml.Linq;
 
 namespace org.xmpp.packet
@@ -220,7 +221,7 @@ namespace org.xmpp.packet
 			if (textElement == null) {
 				textElement = docFactory.createElement("text", ERROR_NAMESPACE);
 				if (lang != null) {
-					textElement.addAttribute(QName.get("lang", "xml",
+					textElement.addAttribute(XName.Get("lang", "xml",
 					                               "http://www.w3.org/XML/1998/namespace"), lang);
 				}
 				element.add(textElement);
@@ -235,10 +236,11 @@ namespace org.xmpp.packet
      * @return the language code of the text description, if it exists.
      */
 		public String getTextLang() {
-			XElement textElement = element.element("text");
-			if (textElement != null) {
-				return textElement.attributeValue(QName.get("lang", "xml",
-				                                        "http://www.w3.org/XML/1998/namespace"));
+			XElement textElement = element.Element("text");
+			if (textElement != null)
+			{
+			    return textElement.Attribute(XName.Get("lang", "xml",
+			        "http://www.w3.org/XML/1998/namespace")).Value;
 			}
 			return null;
 		}
@@ -347,7 +349,7 @@ namespace org.xmpp.packet
 
 		public override string ToString()
 		{
-			StringWriter out = new StringWriter();
+			StringWriter @out = new StringWriter();
 			XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
 			try {
 				writer.write(element);
@@ -355,7 +357,7 @@ namespace org.xmpp.packet
 			catch (Exception e) {
 				// Ignore.
 			}
-			return out.toString();
+			return @out.toString();
 		}
 
 		/**

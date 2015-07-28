@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
 using System.Xml.Linq;
 
 namespace org.xmpp.packet
@@ -33,7 +36,7 @@ namespace org.xmpp.packet
 		public Roster()
 			:base()
 		{
-			element.addElement("query", "jabber:iq:roster");
+			element.Add(new XElement("query", "jabber:iq:roster"));
 		}
 
 		/**
@@ -45,7 +48,7 @@ namespace org.xmpp.packet
 		public Roster(IQ.Type type)
 			: base(type)
 		{
-			element.addElement("query", "jabber:iq:roster");
+			element.Add(new XElement("query", "jabber:iq:roster"));
 		}
 
 		/**
@@ -57,7 +60,7 @@ namespace org.xmpp.packet
 		public Roster(IQ.Type type, string ID)
 			: base(type, ID)
 		{
-			element.addElement("query", "jabber:iq:roster");
+			element.Add(new XElement("query", "jabber:iq:roster"));
 		}
 
 		/**
@@ -67,8 +70,8 @@ namespace org.xmpp.packet
      * @see #createCopy()
      */
 		private Roster(Roster roster) {
-			XElement elementCopy = roster.element.createCopy();
-			docFactory.createDocument().add(elementCopy);
+			XElement elementCopy = new XElement(roster.element);
+			new XDocument(docFactory).Add(elementCopy);
 			this.element = elementCopy;
 		}
 
@@ -98,10 +101,10 @@ namespace org.xmpp.packet
      */
 		public Item addItem(String jid, Subscription subscription) {
 			if (getType() == IQ.Type.get || getType() == IQ.Type.error) {
-				throw new IllegalStateException("IQ type must be 'result' or 'set'");
+                throw new ArgumentException("IQ type must be 'result' or 'set'");
 			}
 			if (jid == null) {
-				throw new NullPointerException("JID cannot be null");
+                throw new ArgumentException("JID cannot be null");
 			}
 			return addItem(new JID(jid), null, null, subscription, null);
 		}
@@ -121,10 +124,10 @@ namespace org.xmpp.packet
      */
 		public Item addItem(JID jid, Subscription subscription)  {
 			if (getType() != IQ.Type.result && getType() != IQ.Type.set) {
-				throw new IllegalStateException("IQ type must be 'result' or 'set'");
+                throw new ArgumentException("IQ type must be 'result' or 'set'");
 			}
 			if (jid == null) {
-				throw new NullPointerException("JID cannot be null");
+                throw new ArgumentException("JID cannot be null");
 			}
 			return addItem(jid, null, null, subscription, null);
 		}
@@ -149,39 +152,43 @@ namespace org.xmpp.packet
 		                Collection<String> groups)
 		{
 			if (jid == null) {
-				throw new NullPointerException("JID cannot be null");
+                throw new ArgumentException("JID cannot be null");
 			}
 			if (subscription == null) {
-				throw new NullPointerException("Subscription cannot be null");
+                throw new ArgumentException("Subscription cannot be null");
 			}
-			Element query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
-			if (query == null) {
-				query = element.addElement("query", "jabber:iq:roster");
+            XElement query = element.Element(XName.Get("query", "jabber:iq:roster"));
+			if (query == null)
+			{
+			    query = new XElement(XName.Get("query", "jabber:iq:roster");
+				element.Add(query);
 			}
-			Element item = null;
+			XElement item = null;
 			for (Iterator<Element> i=query.elementIterator("item"); i.hasNext(); ) {
-				Element el = i.next();
+				XElement el = i.next();
 				if (el.attributeValue("jid").equals(jid.toString())) {
 					item = el;
 				}
 			}
-			if (item == null) {
-				item = query.addElement("item");
+			if (item == null)
+			{
+			    item = new XElement("item");
+				query.Add(item);
 			}
-			item.addAttribute("jid", jid.toBareJID());
-			item.addAttribute("name", name);
+			item.Add(new XAttribute("jid", jid.toBareJID()));
+			item.Add(new XAttribute("name", name));
 			if (ask != null) {
-				item.addAttribute("ask", ask.toString());
+				item.Add(new XAttribute("ask", ask.ToString()));
 			}
-			item.addAttribute("subscription", subscription.toString());
+			item.Add(new XAttribute("subscription", subscription.ToString()));
 			// Erase existing groups in case the item previously existed.
-			for (Iterator<Element> i=item.elementIterator("group"); i.hasNext(); ) {
+			for (Iterator<XElement> i=item.elementIterator("group"); i.hasNext(); ) {
 				item.remove(i.next());
 			}
 			// Add in groups.
 			if (groups != null) {
 				foreach (string group in groups) {
-					item.addElement("group").setText(group);
+					item.Add(new XElement("group", group));
 				}
 			}
 			return new Item(jid, name, ask, subscription, groups);
@@ -193,7 +200,7 @@ namespace org.xmpp.packet
      * @param jid the JID of the item to remove.
      */
 		public void removeItem(JID jid) {
-			XElement query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
+            XElement query = element.Element(XName.Get("query", "jabber:iq:roster"));
 			if (query != null) {
 				for (Iterator<Element> i=query.elementIterator("item"); i.hasNext(); ) {
 					XElement item = i.next();
@@ -212,9 +219,9 @@ namespace org.xmpp.packet
      */
 		public Collection<Item> getItems() {
 			Collection<Item> items = new ArrayList<Item>();
-			XElement query = element.element(new QName("query", Namespace.get("jabber:iq:roster")));
+            XElement query = element.Element(XName.Get("query", "jabber:iq:roster"));
 			if (query != null) {
-				for (Iterator<Element> i=query.elementIterator("item"); i.hasNext(); ) {
+				for (Iterator<XElement> i=query.elementIterator("item"); i.hasNext(); ) {
 					Element item = i.next();
 					String jid = item.attributeValue("jid");
 					String name = item.attributeValue("name");
@@ -327,24 +334,24 @@ namespace org.xmpp.packet
 			}
 
 			public String toString() {
-				StringBuffer buf = new StringBuffer();
-				buf.append("<item ");
-				buf.append("jid=\"").append(jid).append("\"");
+				StringBuilder buf = new StringBuilder();
+				buf.Append("<item ");
+				buf.Append("jid=\"").Append(jid).Append("\"");
 				if (name != null) {
-					buf.append(" name=\"").append(name).append("\"");
+					buf.Append(" name=\"").Append(name).Append("\"");
 				}
-				buf.append(" subscrption=\"").append(subscription).append("\"");
-				if (groups == null || groups.isEmpty()) {
-					buf.append("/>");
+				buf.Append(" subscrption=\"").Append(subscription).Append("\"");
+				if (groups == null || groups.Any()) {
+					buf.Append("/>");
 				}
 				else {
-					buf.append(">\n");
-					for (String group : groups) {
-						buf.append("  <group>").append(group).append("</group>\n");
+					buf.Append(">\n");
+					foreach (string group in groups) {
+						buf.Append("  <group>").Append(group).Append("</group>\n");
 					}
-					buf.append("</item>");
+					buf.Append("</item>");
 				}
-				return buf.toString();
+				return buf.ToString();
 			}
 		}
 
@@ -401,7 +408,7 @@ namespace org.xmpp.packet
          * the resource that initiated the removal of success and 4) send unavailable presence from
          * all of the user's available resources to the contact.
          */
-			remove;
+			remove
 		}
 
 		/**
@@ -427,7 +434,7 @@ namespace org.xmpp.packet
          * The roster owner has asked to the roster item to unsubscribe from it's
          * presence but has not received confirmation.
          */
-			unsubscribe;
+			unsubscribe
 		}
 	}
 }

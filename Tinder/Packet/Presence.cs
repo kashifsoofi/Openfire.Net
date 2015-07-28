@@ -32,7 +32,8 @@ namespace org.xmpp.packet
      * Constructs a new Presence.
      */
 		public Presence() {
-			this.element = docFactory.createDocument().addElement("presence");
+			this.element = new XElement("presence");
+            new XDocument(docFactory).Add(element);
 		}
 
 		/**
@@ -40,8 +41,9 @@ namespace org.xmpp.packet
      *
      * @param type the presence type.
      */
-		public Presence(Presence.Type type) {
-			this();
+		public Presence(Presence.Type type)
+            : this()
+        {
 			setType(type);
 		}
 
@@ -76,8 +78,8 @@ namespace org.xmpp.packet
      */
 		private Presence(Presence presence)
 		{
-			XElement elementCopy = presence.element.createCopy();
-			docFactory.createDocument().add(elementCopy);
+			XElement elementCopy = new XElement(presence.element);
+			new XDocument(docFactory).Add(elementCopy);
 			this.element = elementCopy;
 			// Copy cached JIDs (for performance reasons)
 			this.toJID = presence.toJID;
@@ -103,13 +105,15 @@ namespace org.xmpp.packet
      * @return the presence type or <tt>null</tt> if "available".
      * @see Type
      */
-		public Type getType() {
-			String type = element.attributeValue("type");
-			if (type == null) {
+		public Type? getType()
+		{
+		    string type = element.Attribute("type").Value;
+			if (string.IsNullOrEmpty(type)) {
 				return null;
 			}
-			else {
-				return Type.valueOf(type);
+			else
+			{
+			    return (Type)Enum.Parse(typeof (Type), type);
 			}
 		}
 
@@ -120,7 +124,7 @@ namespace org.xmpp.packet
      * @see Type
      */
 		public void setType(Type type) {
-			element.addAttribute("type", type==null?null:type.toString());
+            element.Add(new XAttribute("type", type == null ? null : type.ToString()));
 		}
 
 		/**
@@ -133,13 +137,14 @@ namespace org.xmpp.packet
      * @return the presence show value..
      * @see Show
      */
-		public Show getShow() {
-			String show = element.elementText("show");
-			if (show == null) {
+		public Show? getShow()
+		{
+		    string show = element.Element("show").Value;
+			if (string.IsNullOrEmpty(show)) {
 				return null;
 			}
 			else {
-				return Show.valueOf(show);
+				return(Show) Enum.Parse(typeof(Show), show);
 			}
 		}
 
@@ -153,22 +158,21 @@ namespace org.xmpp.packet
      * @throws IllegalArgumentException if the presence type is not available.
      * @see Show
      */
-		public void setShow(Show show) {
-			Element showElement = element.element("show");
+		public void setShow(Show? show) {
+			XElement showElement = element.Element("show");
 			// If show is null, clear the subject.
 			if (show == null) {
 				if (showElement != null) {
-					element.remove(showElement);
+					showElement.Remove();
 				}
 				return;
 			}
 			if (showElement == null) {
 				if (!isAvailable()) {
-					throw new IllegalArgumentException("Cannot set 'show' if 'type' attribute is set.");
+					throw new ArgumentException("Cannot set 'show' if 'type' attribute is set.");
 				}
-				showElement = element.addElement("show");
+			    element.Add(new XElement("show", show.ToString()));
 			}
-			showElement.setText(show.toString());
 		}
 
 		/**
@@ -177,8 +181,9 @@ namespace org.xmpp.packet
      *
      * @return the status.
      */
-		public String getStatus() {
-			return element.elementText("status");
+		public String getStatus()
+		{
+		    return element.Element("status").Value;
 		}
 
 		/**
@@ -188,19 +193,18 @@ namespace org.xmpp.packet
      * @param status the status.
      */
 		public void setStatus(String status) {
-			Element statusElement = element.element("status");
+			XElement statusElement = element.Element("status");
 			// If subject is null, clear the subject.
 			if (status == null) {
 				if (statusElement != null) {
-					element.remove(statusElement);
+					statusElement.Remove();
 				}
 				return;
 			}
 
 			if (statusElement == null) {
-				statusElement = element.addElement("status");
+				element.Add(new XElement("status", status));
 			}
-			statusElement.setText(status);
 		}
 
 		/**
@@ -211,13 +215,13 @@ namespace org.xmpp.packet
      * @return the priority.
      */
 		public int getPriority() {
-			String priority = element.elementText("priority");
-			if (priority == null) {
+			String priority = element.Element("priority").Value;
+			if (string.IsNullOrEmpty(priority)) {
 				return 0;
 			}
 			else {
 				try {
-					return Integer.parseInt(priority);
+					return Int32.Parse(priority);
 				}
 				catch (Exception e) {
 					return 0;
@@ -234,14 +238,13 @@ namespace org.xmpp.packet
      */
 		public void setPriority(int priority) {
 			if (priority < -128 || priority > 128) {
-				throw new IllegalArgumentException("Priority value of " + priority +
+				throw new ArgumentException("Priority value of " + priority +
 				                               " is outside the valid range of -128 through 128");
 			}
-			Element priorityElement = element.element("priority");
+			XElement priorityElement = element.Element("priority");
 			if (priorityElement == null) {
-				priorityElement = element.addElement("priority");
+				element.Add(new XElement("priority", priority));
 			}
-			priorityElement.setText(Integer.toString(priority));
 		}
 
 		/**
@@ -262,14 +265,9 @@ namespace org.xmpp.packet
      * @return the first matching child element, or <tt>null</tt> if there
      *      is no matching child element.
      */
-		public Element getChildElement(String name, String @namespace) {
-			for (Iterator<Element> i=element.elementIterator(name); i.hasNext(); ) {
-				Element element = i.next();
-				if (element.getNamespaceURI().equals(@namespace)) {
-					return element;
-				}
-			}
-			return null;
+		public XElement getChildElement(string name, string @namespace)
+		{
+		    return element.Element(@namespace + name);
 		}
 
 		/**
@@ -289,8 +287,11 @@ namespace org.xmpp.packet
      * @param namespace the element namespace.
      * @return the newly created child element.
      */
-		public Element addChildElement(String name, String namespace) {
-			return element.addElement(name, namespace);
+		public XElement addChildElement(String name, String @namespace)
+		{
+		    var childElement = new XElement(@namespace + name);
+			element.Add(childElement);
+		    return childElement;
 		}
 
 		/**
@@ -298,7 +299,7 @@ namespace org.xmpp.packet
      *
      * @return a deep copy of this Presence.
      */
-		public Presence createCopy() {
+		public override Presence createCopy() {
 			return new Presence(this);
 		}
 
@@ -362,7 +363,7 @@ namespace org.xmpp.packet
          * An error has occurred regarding processing or delivery
          * of a previously-sent presence stanza.
          */
-			error;
+			error
 		}
 
 		/**
@@ -400,7 +401,7 @@ namespace org.xmpp.packet
 			/**
          * The entity or resource is busy (dnd = "Do Not Disturb").
          */
-			dnd;
+			dnd
 		}
 	}
 }

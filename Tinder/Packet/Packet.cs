@@ -271,7 +271,7 @@ namespace org.xmpp.packet
      *         name and namespace or null if none was found.
      */
 		public PacketExtension getExtension(string name, string @namespace) {
-			List<XElement> extensions = element.Elements(QName.get(name, @namespace)).ToList();
+			List<XElement> extensions = element.Elements(XName.Get(name, @namespace)).ToList();
 			if (!extensions.isEmpty()) {
 				Class<? extends PacketExtension> extensionClass = PacketExtension.getExtensionClass(name, @namespace);
 				// If a specific PacketExtension implementation has been registered, use that.
@@ -306,7 +306,7 @@ namespace org.xmpp.packet
      * @return true if a child element was removed.
      */
 		public bool deleteExtension(string name, string @namespace) {
-			List<XElement> extensions = element.Elements(QName.get(name, @namespace)).ToList();
+			List<XElement> extensions = element.Elements(XName.Get(name, @namespace)).ToList();
 			if (!extensions.isEmpty()) {
 				element.remove(extensions.get(0));
 				return true;

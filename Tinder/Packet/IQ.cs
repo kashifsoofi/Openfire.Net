@@ -1,4 +1,7 @@
-﻿using NLog;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
+using NLog;
 // Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,12 +40,9 @@ namespace org.xmpp.packet
      * Constructs a new IQ with an automatically generated ID and a type
      * of {@link Type#get IQ.Type.get}.
      */
-		public IQ() {
-			this.element = docFactory.createDocument().addElement("iq");
-			String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
-			setType(Type.get);
-			setID(id);
-		}
+		public IQ()
+            : this(Type.get)
+        { }
 
 		/**
      * Constructs a new IQ using the specified type. A packet ID will
@@ -51,9 +51,10 @@ namespace org.xmpp.packet
      * @param type the IQ type.
      */
 		public IQ(IQ.Type type) {
-			this.element = docFactory.createDocument().addElement("iq");
+            this.element = new XElement("iq");
+            new XDocument(docFactory).Add(element);
 			setType(type);
-			String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
+			String id = string.Format("{0}-{1}", random.Next(1000), sequence++);
 			setID(id);
 		}
 
@@ -64,7 +65,8 @@ namespace org.xmpp.packet
      * @param type the IQ type.
      */
 		public IQ(IQ.Type type, string ID) {
-			this.element = docFactory.createDocument().addElement("iq");
+            this.element = new XElement("iq");
+            new XDocument(docFactory).Add(element);
 			setType(type);
 			setID(ID);
 		}
@@ -100,8 +102,8 @@ namespace org.xmpp.packet
      * @see #createCopy()
      */
 		private IQ(IQ iq) {
-			XElement elementCopy = iq.element.createCopy();
-			docFactory.createDocument().add(elementCopy);
+			XElement elementCopy = new XElement(iq.element);
+            new XDocument(docFactory).Add(elementCopy);
 			this.element = elementCopy;
 			// Copy cached JIDs (for performance reasons)
 			this.toJID = iq.toJID;
@@ -114,13 +116,14 @@ namespace org.xmpp.packet
      * @return the IQ type.
      * @see Type
      */
-		public IQ.Type getType() {
-			String type = element.attributeValue("type");
-			if (type != null) {
-				return Type.valueOf(type);
-			}
-			else {
+		public IQ.Type? getType() {
+		    string type = element.Attribute("type").Value;
+			if (string.IsNullOrEmpty(type)) {
 				return null;
+			}
+			else
+			{
+			    return (Type)Enum.Parse(typeof (Type), type);
 			}
 		}
 
@@ -131,7 +134,7 @@ namespace org.xmpp.packet
      * @see Type
      */
 		public void setType(IQ.Type type) {
-			element.addAttribute("type", type==null?null:type.ToString());
+            element.Add(new XAttribute("type", type == null ? null : type.ToString()));
 		}
 
 		/**
@@ -140,8 +143,8 @@ namespace org.xmpp.packet
      * @return True or false if this is a request stanza
      */
 		public bool isRequest() {
-			Type type = getType();
-			return (type != null && (type.equals(Type.get) || type.equals(Type.set)));
+			Type? type = getType();
+			return (type != null && (type == Type.get || type == Type.set));
 		}
 
 		/**
@@ -150,8 +153,8 @@ namespace org.xmpp.packet
      * @return True or false if this is a response stanza
      */
 		public bool isResponse() {
-			Type type = getType();
-			return (type != null && (type.equals(Type.result) || type.equals(Type.error)));
+			Type? type = getType();
+            return (type != null && (type == Type.result || type == Type.error));
 		}
 
 		/**
@@ -169,19 +172,19 @@ namespace org.xmpp.packet
      */
 		public XElement getChildElement() {
 			List<XElement> elements = element.Elements().ToList();
-			if (elements.isEmpty()) {
+			if (elements.Count == 0) {
 				return null;
 			}
 			else {
 				// Search for a child element that is in a different namespace.
-				for (int i=0; i<elements.size(); i++) {
-					Element element = elements.get(i);
-					String @namespace = element.getNamespaceURI();
-					if (!@namespace.equals("") && !@namespace.equals("jabber:client") &&
-					!@namespace.equals("jabber:server"))
-					{
-						return element;
-					}
+				for (int i=0; i<elements.Count; i++) {
+					XElement child = elements[i];
+				    string @namespace = child.GetDefaultNamespace().ToString();
+				    if (!@namespace.Equals("") && !@namespace.Equals("jabber:client") &&
+				        !@namespace.Equals("jabber:server"))
+				    {
+				        return child;
+				    }
 				}
 				return null;
 			}
@@ -207,11 +210,12 @@ namespace org.xmpp.packet
      *
      * @param childElement the child element.
      */
-		public void setChildElement(Element childElement) {
-			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
-				element.remove(i.next());
-			}
-			element.add(childElement);
+		public void setChildElement(XElement childElement) {
+		    foreach (var child in element.Elements())
+		    {
+		        child.Remove();
+		    }
+			element.Add(childElement);
 		}
 
 		/**
@@ -236,11 +240,14 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return the newly created child element.
      */
-		public Element setChildElement(String name, String namespace) {
-			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
-				element.remove(i.next());
-			}
-			return element.addElement(name, namespace);
+		public XElement setChildElement(string name, string @namespace) {
+		    foreach (var child in element.Elements())
+		    {
+		        child.Remove();
+		    }
+		    var childElement = new XElement(@namespace + name);
+			element.Add(childElement);
+		    return childElement;
 		}
 
 		/**
@@ -260,12 +267,12 @@ namespace org.xmpp.packet
      * @param extension the PacketExtension whose element will be added to this Packet's element.
      */
 		public void addExtension(PacketExtension extension) {
-			Element childElement = getChildElement();
+			XElement childElement = getChildElement();
 			if (childElement == null) {
 				throw new IllegalStateException("Cannot add packet extension when child element is null");
 			}
 			// Add the extension to the child element
-			childElement.add(extension.getElement());
+			childElement.Add(extension.getElement());
 		}
 
 		/**
@@ -288,8 +295,8 @@ namespace org.xmpp.packet
 				return null;
 			}
 			// Search for extensions in the child element
-			List<XElement> extensions = childElement.elements(QName.get(name, @namespace));
-			if (!extensions.isEmpty()) {
+		    List<XElement> extensions = childElement.Elements(XName.Get(name, @namespace)).ToList();
+			if (!extensions.Any()) {
 				Type extensionClass = PacketExtension.getExtensionClass(name, @namespace);
 				if (extensionClass != null) {
 					try {
@@ -299,7 +306,7 @@ namespace org.xmpp.packet
 							extensions.get(0)});
 					}
 					catch (Exception e) {
-						Log.warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
+						Log.Warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
 					}
 				}
 			}
@@ -324,14 +331,17 @@ namespace org.xmpp.packet
      * @return true if a child element was removed.
      */
 		public bool deleteExtension(String name, String @namespace) {
-			Element childElement = getChildElement();
+			XElement childElement = getChildElement();
 			if (childElement == null) {
 				return false;
 			}
 			// Delete extensions in the child element
-			List<XElement> extensions = childElement.Elements(QName.get(name, @namespace));
-			if (!extensions.isEmpty()) {
-				childElement.remove(extensions.get(0));
+			List<XElement> extensions = childElement.Elements(XName.Get(name, @namespace)).ToList();
+			if (!extensions.Any()) {
+			    foreach (var extension in extensions)
+			    {
+			        extension.Remove();
+			    }
 				return true;
 			}
 			return false;
@@ -364,7 +374,7 @@ namespace org.xmpp.packet
      */
 		public static IQ createResultIQ(IQ iq) {
 			if (!(iq.getType() == Type.get || iq.getType() == Type.set)) {
-				throw new IllegalArgumentException(
+				throw new ArgumentException(
 					"IQ must be of type 'set' or 'get'. Original IQ: " + iq.toXML());
 			}
 			IQ result = new IQ(Type.result, iq.getID());
@@ -412,7 +422,7 @@ namespace org.xmpp.packet
          * An error has occurred regarding processing or delivery of a
          * previously-sent get or set.
          */
-			error;
+			error
 
 		}
 	}

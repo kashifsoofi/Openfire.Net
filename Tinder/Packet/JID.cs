@@ -11,6 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.Collections.Concurrent;
 using org.xmpp.util;
 using System;
 using System.Text;
@@ -50,9 +52,9 @@ namespace org.xmpp.packet
 		// Stringprep operations are very expensive. Therefore, we cache node, domain and
 		// resource values that have already had stringprep applied so that we can check
 		// incoming values against the cache.
-		private static readonly ConcurrentMap<String, ValueWrapper<String>> NODEPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(10000).build();
-		private static readonly ConcurrentMap<String, ValueWrapper<String>> DOMAINPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(500).build();
-		private static readonly ConcurrentMap<String, ValueWrapper<String>> RESOURCEPREP_CACHE = new Builder<String, ValueWrapper<String>>().maximumWeightedCapacity(10000).build();
+	    private static readonly ConcurrentDictionary<String, ValueWrapper<String>> NODEPREP_CACHE = new ConcurrentDictionary<String, ValueWrapper<String>>();
+        private static readonly ConcurrentDictionary<String, ValueWrapper<String>> DOMAINPREP_CACHE = new ConcurrentDictionary<String, ValueWrapper<String>>();
+        private static readonly ConcurrentDictionary<String, ValueWrapper<String>> RESOURCEPREP_CACHE = new ConcurrentDictionary<String, ValueWrapper<String>>();
 
 		private readonly string node;
 		private readonly string domain;
@@ -243,7 +245,7 @@ namespace org.xmpp.packet
 					// Validate field is not greater than 1023 bytes. UTF-8
 					// characters use one to four bytes.
 					if (answer != null && answer.getBytes("UTF-8").length > 1023) {
-						throw new IllegalArgumentException("Node cannot be larger "
+						throw new ArgumentException("Node cannot be larger "
 						                               + "than 1023 bytes. Size is "
 						                               + answer.getBytes("UTF-8").length + " bytes.");
 					}

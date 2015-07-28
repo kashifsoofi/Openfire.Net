@@ -14,6 +14,7 @@
 using org.xmpp.packet;
 using org.xmpp.util;
 using System;
+using System.Xml.Linq;
 
 namespace org.xmpp.forms
 {
@@ -58,7 +59,7 @@ namespace org.xmpp.forms
         {
 			UTC_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
 			// Register that DataForms uses the jabber:x:data namespace
-			registeredExtensions.put(QName.get(ELEMENT_NAME, NAMESPACE), DataForm.class);
+			registeredExtensions.put(XName.Get(ELEMENT_NAME, NAMESPACE), DataForm.class);
 		}
 
 		/**

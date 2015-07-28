@@ -13,6 +13,7 @@
 // limitations under the License.
 using System;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace org.xmpp.resultsetmangement
 {
@@ -299,7 +300,7 @@ namespace org.xmpp.resultsetmangement
 				throw new IllegalArgumentException(
 					"Argument 'returnedResults' cannot be null.");
 			}
-			final Element setElement = DocumentHelper.createElement(QName.get(
+			final Element setElement = DocumentHelper.createElement(XName.Get(
 				"set", ResultSet.NAMESPACE_RESULT_SET_MANAGEMENT));
 			// the size element contains the size of this entire result set.
 			setElement.addElement("count").setText(String.valueOf(size()));

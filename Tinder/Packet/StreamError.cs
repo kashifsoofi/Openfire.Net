@@ -38,6 +38,7 @@ namespace org.xmpp.packet
 		public StreamError(Condition condition) {
 			this.element = docFactory.createElement(docFactory.createQName("error", "stream",
 			                                                           "http://etherx.jabber.org/streams"));
+            new XNamespace()
 			setCondition(condition);
 		}
 
@@ -74,7 +75,7 @@ namespace org.xmpp.packet
      *
      * @param element the stream error Element.
      */
-		public StreamError(Element element) {
+		public StreamError(XElement element) {
 			this.element = element;
 		}
 
@@ -104,7 +105,7 @@ namespace org.xmpp.packet
      */
 		public void setCondition(Condition condition) {
 			if (condition == null) {
-				throw new NullPointerException("Condition cannot be null");
+				throw new ArgumentException("Condition cannot be null");
 			}
 			Element conditionElement = null;
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
@@ -151,24 +152,23 @@ namespace org.xmpp.packet
      *      no language code.
      */
 		public void setText(String text, String language) {
-			XElement textElement = element.element("text");
+			XElement textElement = element.Element("text");
 			// If text is null, clear the text.
 			if (text == null) {
 				if (textElement != null) {
-					element.remove(textElement);
+					textElement.Remove();
 				}
 				return;
 			}
 
 			if (textElement == null) {
-				textElement = docFactory.createElement("text", ERROR_NAMESPACE);
+				textElement = new XElement(XName.Get("text", ERROR_NAMESPACE), text);
 				if (language != null) {
-					textElement.addAttribute(QName.get("lang", "xml",
-					                               "http://www.w3.org/XML/1998/namespace"), language);
+					textElement.Add(new XAttribute(XName.Get("lang", "xml",
+					                               "http://www.w3.org/XML/1998/namespace"), language));
 				}
-				element.add(textElement);
+				element.Add(textElement);
 			}
-			textElement.setText(text);
 		}
 
 		/**
@@ -178,9 +178,9 @@ namespace org.xmpp.packet
      * @return the language code of the text description, if it exists.
      */
 		public String getTextLanguage() {
-			XElement textElement = element.element("text");
+			XElement textElement = element.Element("text");
 			if (textElement != null) {
-				return textElement.attributeValue(QName.get("lang", "xml",
+				return textElement.attributeValue(XName.Get("lang", "xml",
 				                                        "http://www.w3.org/XML/1998/namespace"));
 			}
 			return null;

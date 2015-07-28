@@ -39,7 +39,7 @@ namespace org.xmpp.packet
      * Subclasses of PacketExtension should register the element name and namespace that the
      * subclass is using.
      */
-		protected static readonly Dictionary<QName, Type> registeredExtensions = new ConcurrentDictionary<QName, Type>();
+        protected static readonly ConcurrentDictionary<XName, Type> registeredExtensions = new ConcurrentDictionary<XName, Type>();
 
 		protected XElement element;
 
@@ -53,7 +53,7 @@ namespace org.xmpp.packet
      * @return the extension class to use for the specified element name and namespace.
      */
 		public static Type getExtensionClass(String name, String @namespace) {
-			return registeredExtensions[QName.get(name, @namespace)];
+			return registeredExtensions[XName.Get(name, @namespace)];
 		}
 
 		/**
@@ -64,7 +64,7 @@ namespace org.xmpp.packet
      */
 		public PacketExtension(String name, String @namespace)
         {
-			this.element = new XElement(name, @namespace);
+            this.element = new XElement(XName.Get(name, @namespace));
             docFactory.Add(element);
 		}
 
