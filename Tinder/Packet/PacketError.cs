@@ -264,7 +264,7 @@ namespace org.xmpp.packet
      */
 		public void setApplicationCondition(String name, String namespaceURI) {
 			if (ERROR_NAMESPACE.Equals(namespaceURI)) {
-				throw new IllegalArgumentException();
+				throw new ArgumentException();
 			}
 
 			XElement applicationError = null;
@@ -300,8 +300,8 @@ namespace org.xmpp.packet
      * @return the name of the application-specific error condition, if it exists.
      */
 		public String getApplicationConditionName() {
-			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
-				Element el = i.next();
+			for (Iterator<XElement> i=element.elementIterator(); i.hasNext(); ) {
+				XElement el = i.next();
 				if (!el.getNamespaceURI().equals(ERROR_NAMESPACE))
 				{
 					return el.getName();

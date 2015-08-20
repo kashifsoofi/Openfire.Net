@@ -13,6 +13,7 @@
 // limitations under the License.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace org.xmpp.resultsetmangement
@@ -212,8 +213,7 @@ namespace org.xmpp.resultsetmangement
 	 * 
 	 * @see java.util.AbstractCollection#iterator()
 	 */
-		@Override
-		public Iterator<T> iterator() {
+		public IEnumerable<T> iterator() {
 			return new Itr();
 		}
 
@@ -227,13 +227,13 @@ namespace org.xmpp.resultsetmangement
 	 *            directives.
      * @return a list of Results that matches the directives.
 	 */
-		public List<T> applyRSMDirectives(Element rsmElement) {
+		public List<T> applyRSMDirectives(XElement rsmElement) {
 			if (rsmElement == null || !isValidRSMRequest(rsmElement)) {
-				throw new IllegalArgumentException(
+				throw new ArgumentException(
 					"The 'rsmElement' argument must be a valid, non-null RSM element.");
 			}
 
-			final int max = Integer.parseInt(rsmElement.element("max").getText());
+		    int max = Int32.Parse(rsmElement.Element("max").Value);
 
 			if (max == 0) {
 				// this is a request for a resultset count.
@@ -241,9 +241,9 @@ namespace org.xmpp.resultsetmangement
 			}
 
 			// optional elements
-			Element afterElement = rsmElement.element("after");
-			Element beforeElement = rsmElement.element("before");
-			Element indexElement = rsmElement.element("index");
+			XElement afterElement = rsmElement.Element("after");
+			XElement beforeElement = rsmElement.Element("before");
+			XElement indexElement = rsmElement.Element("index");
 
 			// Identify the pointer object in this set. This is the object before
 			// (or after) the first (respectivly last) element of the subset that
@@ -256,22 +256,23 @@ namespace org.xmpp.resultsetmangement
 			bool isForwardOriented = true;
 
 			if (afterElement != null) {
-				pointerUID = afterElement.getText();
+				pointerUID = afterElement.Value;
 			} else if (beforeElement != null) {
-				pointerUID = beforeElement.getText();
+				pointerUID = beforeElement.Value;
 				isForwardOriented = false;
 			} else if (indexElement != null) {
-				final int index = Integer.parseInt(indexElement.getText());
+				int index = Int32.Parse(indexElement.Value);
 				if (index > 0) {
 					pointerUID = getUID(index - 1);
 				}
 			}
 
-			if (pointerUID != null && pointerUID.equals("")) {
-				pointerUID = null;
-			}
+		    if (string.IsNullOrEmpty(pointerUID))
+		    {
+		        pointerUID = null;
+		    }
 
-			if (isForwardOriented) {
+		    if (isForwardOriented) {
 				if (pointerUID == null) {
 					return getFirst(max);
 				}
@@ -295,19 +296,19 @@ namespace org.xmpp.resultsetmangement
 	 * @return An Element named 'set' that can be included in the result IQ
 	 *         stanza, which returns the subset of results.
 	 */
-		public Element generateSetElementFromResults(List<T> returnedResults) {
+		public XElement generateSetElementFromResults(List<T> returnedResults) {
 			if (returnedResults == null) {
-				throw new IllegalArgumentException(
+				throw new ArgumentException(
 					"Argument 'returnedResults' cannot be null.");
 			}
-			final Element setElement = DocumentHelper.createElement(XName.Get(
+			XElement setElement = DocumentHelper.createElement(XName.Get(
 				"set", ResultSet.NAMESPACE_RESULT_SET_MANAGEMENT));
 			// the size element contains the size of this entire result set.
 			setElement.addElement("count").setText(String.valueOf(size()));
 
 			// if the query wasn't a 'count only' query, add two more elements
 			if (returnedResults.size() > 0) {
-				final Element firstElement = setElement.addElement("first");
+				XElement firstElement = setElement.addElement("first");
 				firstElement.addText(returnedResults.get(0).getUID());
 				firstElement.addAttribute("index", String
 				                      .valueOf(indexOf(returnedResults.get(0))));
@@ -329,55 +330,56 @@ namespace org.xmpp.resultsetmangement
 	 *         otherwise.
 	 */
 		// Dom4J doesn't do generics, sadly.
-		public static bool isValidRSMRequest(Element rsmElement) {
+		public static bool isValidRSMRequest(XElement rsmElement) {
 			if (rsmElement == null) {
-				throw new IllegalArgumentException(
+				throw new ArgumentException(
 					"The argument 'rsmElement' cannot be null.");
 			}
 
-			if (!rsmElement.getName().equals("set")) {
+			if (!rsmElement.Name.LocalName.Equals("set")) {
 				// the name of the element must be "set".
 				return false;
 			}
 
-			if (!rsmElement.getNamespaceURI().equals(
+			if (!rsmElement.Name.Namespace.NamespaceName.Equals(
 				NAMESPACE_RESULT_SET_MANAGEMENT)) {
 				// incorrect namespace
 				return false;
 			}
 
-			Element maxElement = rsmElement.element("max");
+			XElement maxElement = rsmElement.Element("max");
 			if (maxElement == null) {
 				// The 'max' element in an RSM request must be available
 				return false;
 			}
 
-			string sMax = maxElement.getText();
-			if (sMax == null || sMax.length() == 0) {
+			string sMax = maxElement.Value;
+			if (string.IsNullOrEmpty(sMax)) {
 				// max element must contain a value.
 				return false;
 			}
 
 			try {
-				if (Integer.parseInt(sMax) < 0) {
+				if (Int32.Parse(sMax) < 0) {
 					// must be a postive integer.
 					return false;
 				}
-			} catch (NumberFormatException e) {
+			} catch (FormatException e) {
 				// the value of 'max' must be an integer value.
 				return false;
 			}
 
-			List<Element> allElements = rsmElement.elements();
+		    List<XElement> allElements = rsmElement.Elements().ToList();
 			int optionalElements = 0;
-			for (Element element : allElements) {
-				string name = element.getName();
-				if (!validRequestFields.contains(name)) {
+			foreach (XElement element in allElements)
+			{
+			    string name = element.Name.LocalName;
+				if (!validRequestFields.Contains(name)) {
 					// invalid element.
 					return false;
 				}
 
-				if (!name.equals("max")) {
+				if (!name.Equals("max")) {
 					optionalElements++;
 				}
 
@@ -386,18 +388,19 @@ namespace org.xmpp.resultsetmangement
 					return false;
 				}
 
-				if (name.equals("index")) {
-					string value = element.getText();
-					if (value == null || value.equals("")) {
+				if (name.Equals("index"))
+				{
+				    string value = element.Value;
+					if (string.IsNullOrEmpty(value)) {
 						// index elements must have a numberic value.
 						return false;
 					}
 					try {
-						if (Integer.parseInt(value) < 0) {
+						if (Int32.Parse(value) < 0) {
 							// index values must be positive.
 							return false;
 						}
-					} catch (NumberFormatException e) {
+					} catch (FormatException e) {
 						// index values must be numeric.
 						return false;
 					}
@@ -405,47 +408,6 @@ namespace org.xmpp.resultsetmangement
 			}
 
 			return true;
-		}
-
-		/**
-	 * Basic Iterator implementation. Forward scrolling only. Does not support
-	 * modification.
-	 * 
-	 * @author Guus der Kinderen, guus@nimbuzz.com
-	 * 
-	 */
-		class Itr implements Iterator<T> {
-			/**
-		 * Index of element to be returned by subsequent call to next.
-		 */
-			int cursor = 0;
-
-			/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Iterator#hasNext()
-		 */
-			public bool hasNext() {
-				return cursor != size();
-			}
-
-			/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Iterator#next()
-		 */
-			public E next() {
-				return get(cursor++);
-			}
-
-			/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Iterator#remove()
-		 */
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
 		}
 	}
 }
