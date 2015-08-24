@@ -204,7 +204,7 @@ namespace org.xmpp.component
 	 * @param packet
 	 *            The stanza that will be processed.
 	 */
-		private sealed void processQueuedPacket(Packet packet)
+		private sealed void ProcessQueuedPacket(Packet packet)
 		{
 			if (packet is IQ)
 			{
@@ -250,7 +250,7 @@ namespace org.xmpp.component
 	 */
 		private sealed void processIQ(IQ iq)
 		{
-			log.debug("(serving component '{}') Processing IQ (packetId {}): {}",
+			log.Debug("(serving component '{}') Processing IQ (packetId {}): {}",
 			      new Object[] {getName(), iq.getID(), iq.toXML() });
 
 			IQ response = null;
@@ -352,13 +352,13 @@ namespace org.xmpp.component
 	 *            The message stanza to process.
 	 */
 		private sealed void processMessage(Message message) {
-			log.trace("(serving component '{}') Processing message stanza: {}",
+			log.Trace("(serving component '{}') Processing message stanza: {}",
 			      getName(), message.toXML());
 			if (servesLocalUsersOnly() && !sentByLocalEntity(message)) {
-				log.info("(serving component '{}') Dropping message "
+				log.Info("(serving component '{}') Dropping message "
 				     + "stanza sent by a user from another domain: {}",
 				     getName(), message.getFrom());
-				log.debug("(serving component '{}') Dropping message "
+				log.Debug("(serving component '{}') Dropping message "
 				      + "stanza sent by a user from another domain: {}",
 				      getName(), message.toXML());
 				return;
@@ -376,13 +376,13 @@ namespace org.xmpp.component
 	 *            The presence stanza to process.
 	 */
 		private sealed void processPresence(Presence presence) {
-			log.trace("(serving component '{}') Processing presence stanza: {}",
+			log.Trace("(serving component '{}') Processing presence stanza: {}",
 			      getName(), presence.toXML());
 			if (servesLocalUsersOnly() && !sentByLocalEntity(presence)) {
-				log.info("(serving component '{}') Dropping presence "
+				log.Info("(serving component '{}') Dropping presence "
 				     + "stanza sent by a user from another domain: {}",
 				     getName(), presence.getFrom());
-				log.debug("(serving component '{}') Dropping presence "
+				log.Debug("(serving component '{}') Dropping presence "
 				      + "stanza sent by a user from another domain: {}",
 				      getName(), presence.toXML());
 				return;
@@ -428,17 +428,17 @@ namespace org.xmpp.component
 	 */
 		private sealed IQ processIQRequest(IQ iq)
 		{
-			log.debug("(serving component '{}') Processing IQ "
+			log.Debug("(serving component '{}') Processing IQ "
 			      + "request (packetId {}).", getName(), iq.getID());
 
 			// IQ get (and set) stanza's MUST be replied to.
-			Element childElement = iq.getChildElement();
+			XElement childElement = iq.getChildElement();
 			string @namespace = null;
 			if (childElement != null) {
 				@namespace = childElement.getNamespaceURI();
 			}
 			if (@namespace == null) {
-				log.debug("(serving component '{}') Invalid XMPP "
+				log.Debug("(serving component '{}') Invalid XMPP "
 				      + "- no child element or namespace in IQ "
 				      + "request (packetId {})", getName(), iq.getID());
 				// this isn't valid XMPP.
@@ -448,10 +448,10 @@ namespace org.xmpp.component
 			}
 			// check if this is a component for local users only.
 			if (servesLocalUsersOnly() && !sentByLocalEntity(iq)) {
-				log.info("(serving component '{}') Returning "
+				log.Info("(serving component '{}') Returning "
 				     + "'not-authorized' IQ error to a user from "
 				     + "another domain: {}", getName(), iq.getFrom());
-				log.debug("(serving component '{}') Returning "
+				log.Debug("(serving component '{}') Returning "
 				      + "'not-authorized' IQ error to a user from "
 				      + "another domain: {}", getName(), iq.toXML());
 				IQ error = IQ.createResultIQ(iq);
@@ -461,27 +461,27 @@ namespace org.xmpp.component
 			Type type = iq.getType();
 			if (type == Type.get) {
 				if (NAMESPACE_DISCO_INFO.equals(@namespace)) {
-					log.trace("(serving component '{}') "
+					log.Trace("(serving component '{}') "
 					      + "Calling #handleDiscoInfo() (packetId {}).",
 					      getName(), iq.getID());
 					return handleDiscoInfo(iq);
 				} else if (NAMESPACE_DISCO_ITEMS.equals(@namespace)) {
-					log.trace("(serving component '{}') "
+					log.Trace("(serving component '{}') "
 					      + "Calling #handleDiscoItems() (packetId {}).",
 					      getName(), iq.getID());
 					return handleDiscoItems(iq);
 				} else if (NAMESPACE_XMPP_PING.equals(@namespace)) {
-					log.trace("(serving component '{}') "
+					log.Trace("(serving component '{}') "
 					      + "Calling #handlePing() (packetId {}).", getName(), iq
 					      .getID());
 					return handlePing(iq);
 				} else if (NAMESPACE_LAST_ACTIVITY.equals(@namespace)) {
-					log.trace("(serving component '{}') "
+					log.Trace("(serving component '{}') "
 					      + "Calling #handleLastActivity() (packetId {}).", getName(), iq
 					      .getID());
 					return handleLastActivity(iq);
 				} else if (NAMESPACE_ENTITY_TIME.equals(@namespace)) {
-					log.trace("(serving component '{}') "
+					log.Trace("(serving component '{}') "
 					      + "Calling #handleEntityTime() (packetId {}).", getName(), iq
 					      .getID());
 					return handleEntityTime(iq);
@@ -526,7 +526,7 @@ namespace org.xmpp.component
 		{
 			// Doesn't do anything. Override this method to process IQ error
 			// stanzas.
-			log.info("(serving component '{}') IQ stanza "
+			log.Info("(serving component '{}') IQ stanza "
 			     + "of type <tt>error</tt> received: ", getName(), iq.toXML());
 		}
 
@@ -637,7 +637,7 @@ namespace org.xmpp.component
 		protected IQ handleDiscoInfo(IQ iq)
 		{
 			IQ replyPacket = IQ.createResultIQ(iq);
-			Element responseElement = replyPacket.setChildElement("query",
+			XElement responseElement = replyPacket.setChildElement("query",
 			                                                        NAMESPACE_DISCO_INFO);
 
 			// identity
@@ -703,7 +703,7 @@ namespace org.xmpp.component
 	 */
 		protected virtual IQ handleEntityTime(IQ iq)
 		{
-			Date now = new Date();
+			DateTime now = DateTime.Now;
 			SimpleDateFormat sdf = new SimpleDateFormat(XMPPConstants.XMPP_DATETIME_FORMAT);
 			SimpleDateFormat sdf_timezone = new SimpleDateFormat("Z");
 
@@ -875,7 +875,7 @@ namespace org.xmpp.component
 	 */
 		private void closeQueue()
 		{
-			log.debug("Closing queue...");
+			log.Debug("Closing queue...");
 			/*
 		 * This method gets called as part of the Component#shutdown() routine.
 		 * If that method gets called, the component has already been removed
@@ -917,7 +917,7 @@ namespace org.xmpp.component
 			try {
 				compMan.sendPacket(this, packet);
 			} catch (ComponentException e) {
-				log.warn("(serving component '" + getName()
+				log.Warn("(serving component '" + getName()
 				     + "') Could not send packet!", e);
 			}
 		}
@@ -1019,38 +1019,30 @@ namespace org.xmpp.component
 			    .endsWith("." + getDomain()));
 		}
 
-		/**
-	 * A wrapper for the packet to be processed. This enables the packet to be
-	 * fed to another thread.
-	 * 
-	 * @author Guus der Kinderen, guus.der.kinderen@gmail.com
-	 */
-		private class PacketProcessor implements Runnable
+		/// <summary>
+		/// A wrapper for the packet to be processed. This enables the packet to be
+		/// fed to another thread.
+		/// @author Guus der Kinderen, guus.der.kinderen@gmail.com
+		/// </summary>
+		private class PacketProcessor
 		{
-			/**
-		 * The packet to be processed.
-		 */
+			/// <summary>
+			/// The packet to be processed.
+			/// </summary>
 			private readonly Packet packet;
 
-			/**
-		 * Creates a new wrapper for a Packet.
-		 * 
-		 * @param packet
-		 *            the Packet to be processed.
-		 */
+			/// <summary>
+			/// Initializes a new instance of the <see cref="org.xmpp.component.AbstractComponent+PacketProcessor"/> class.
+			/// </summary>
+			/// <param name="packet">the Packet to be processed.</param>
 			public PacketProcessor(Packet packet)
 			{
 				this.packet = packet;
 			}
 
-			/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Runnable#run()
-		 */
-			public void run()
+			public void Run()
 			{
-				processQueuedPacket(packet);
+				ProcessQueuedPacket(packet);
 			}
 		}
 	}

@@ -91,56 +91,56 @@ namespace org.xmpp.resultsetmangement
 	 *            The Comparator that defines the order of the Results in this
 	 *            result set.
 	 */
-		public ResultSetImpl(Collection<T> results, Comparator<T> comparator) {
+		public ResultSetImpl(ICollection<T> results, IComparer<T> comparator) {
 			if (results == null) {
 				throw new NullReferenceException("Argument 'results' cannot be null.");
 			}
 
-			int size = results. size();
+			int size = results.Count;
 			resultList = new List<T>(size);
 			uidToIndex = new Dictionary<string, int>(size);
 
 			// sort the collection, if need be.
 			List<T> sortedResults = null;
 			if (comparator != null) {
-				sortedResults = new ArrayList<T>(results);
-				Collections.sort(sortedResults, comparator);
+				sortedResults = new List<T>(results);
+				sortedResults.Sort(comparator);
 			}
 
 			int index = 0;
 			// iterate over either the sorted or unsorted collection
-			for (E result : (sortedResults != null ? sortedResults : results)) {
+			foreach (E result in sortedResults ?? results) {
 				if (result == null) {
-					throw new NullPointerException(
+					throw new NullReferenceException(
 						"The result set must not contain 'null' elements.");
 				}
 
-				final String uid = result.getUID();
-				if (uidToIndex.containsKey(uid)) {
-					throw new IllegalArgumentException(
+				string uid = result.getUID();
+				if (uidToIndex.ContainsKey(uid)) {
+					throw new ArgumentException(
 						"The result set can not contain elements that have the same UID.");
 				}
 
-				resultList.add(result);
-				uidToIndex.put(uid, index);
+				resultList.Add(result);
+				uidToIndex.Add(uid, index);
 				index++;
 			}
 		}
 
 		/*
-	 * (non-Javadoc)
+		 * (non-Javadoc)
 	 * 
 	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#size()
 	 */
-		public int size() {
+		public int Size() {
 			return resultList.Count;
 		}
 
 		/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#getAfter(E, int)
-	 */
+		 * (non-Javadoc)
+		 * 
+		 * @see com.buzzaa.xmpp.resultsetmanager.ResultSet#getAfter(E, int)
+		 */
 		public List<T> getAfter(String uid, int maxAmount) {
 			if (string.IsNullOrEmpty(uid)) {
                 throw new NullReferenceException("Argument 'uid' cannot be null or an empty String.");

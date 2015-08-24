@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Xml.Linq;
-using NLog;
-// Copyright (C) 2004-2009 Jive Software. All rights reserved.
+﻿// Copyright (C) 2004-2009 Jive Software. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +12,10 @@ using NLog;
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
+using NLog;
 
 namespace org.xmpp.packet
 {

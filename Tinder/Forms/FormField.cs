@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.ComponentModel;
+using System.Xml.Linq;
 
 namespace org.xmpp.forms
 {
@@ -24,9 +26,9 @@ namespace org.xmpp.forms
  */
 	public class FormField
 	{
-		private Element element;
+		private XElement element;
 
-		FormField(Element element) {
+		FormField(XElement element) {
 			this.element = element;
 		}
 
@@ -81,7 +83,6 @@ namespace org.xmpp.forms
      *
      * @return the available options to answer for this question.
      */
-		@SuppressWarnings("unchecked")
 		public List<Option> getOptions() {
 			List<Option> answer = new ArrayList<Option>();
 			for (Iterator<Element> it = element.elementIterator("option"); it.hasNext();) {
@@ -333,7 +334,8 @@ namespace org.xmpp.forms
          * options. The allowable values are 1 for yes/true/assent and 0 for no/false/decline.
          * The default value is 0.
          */
-			bool_type("bool"),
+			[Description("bool")]
+			bool_type,
 
 			/**
          * The field is intended for data description (e.g., human-readable text such as
@@ -341,52 +343,61 @@ namespace org.xmpp.forms
          * SHOULD NOT contain newlines (the \n and \r characters); instead an application
          * SHOULD generate multiple fixed fields, each with one <value/> child.
          */
-			fixed("fixed"),
+			[Description("fixed")]
+			@fixed,
 
 			/**
          * The field is not shown to the entity providing information, but instead is
          * returned with the form.
          */
-			hidden("hidden"),
+			[Description("hidden")]
+			hidden,
 
 			/**
          * The field enables an entity to gather or provide multiple Jabber IDs.
          */
-			jid_multi("jid-multi"),
+			[Description("jid-multi")]
+			jid_multi,
 
 			/**
          * The field enables an entity to gather or provide multiple Jabber IDs.
          */
-			jid_single("jid-single"),
+			[Description("jid-single")]
+			jid_single,
 
 			/**
          * The field enables an entity to gather or provide one or more options from
          * among many.
          */
-			list_multi("list-multi"),
+			[Description("list-multi")]
+			list_multi,
 
 			/**
          * The field enables an entity to gather or provide one option from among many.
          */
-			list_single("list-single"),
+			[Description("list-single")]
+			list_single,
 
 			/**
          * The field enables an entity to gather or provide multiple lines of text.
          */
-			text_multi("text-multi"),
+			[Description("text-multi")]
+			text_multi,
 
 			/**
          * The field enables an entity to gather or provide a single line or word of text,
          * which shall be obscured in an interface (e.g., *****).
          */
-			text_private("text-private"),
+			[Description("text-private")]
+			text_private,
 
 			/**
          * The field enables an entity to gather or provide a single line or word of text,
          * which may be shown in an interface. This field type is the default and MUST be
          * assumed if an entity receives a field type it does not understand.
          */
-			text_single("text-single");
+			[Description("text-single")]
+			text_single
 
 			/**
          * Converts a String value into its Type representation.
