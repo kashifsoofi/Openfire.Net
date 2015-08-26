@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Xml.Linq;
 
 namespace org.xmpp.forms
@@ -28,7 +31,7 @@ namespace org.xmpp.forms
 	{
 		private XElement element;
 
-		FormField(XElement element) {
+		public FormField(XElement element) {
 			this.element = element;
 		}
 
@@ -40,21 +43,21 @@ namespace org.xmpp.forms
      * 
      * @param value a default value or an answered value of the question.
      */
-		public void addValue(Object value) {
+		public void AddValue(Object value) {
 			if (value == null) {
 				return;
 			}
-			element.addElement("value").setText(DataForm.encode(value));
+			element.Add(new XElement("value", DataForm.Encode(value)));
 		}
 
 		/**
      * Removes all the values of the field.
      */
-		public void clearValues() {
-			for (Iterator<Element> it = element.elementIterator("value"); it.hasNext();) {
-				it.next();
-				it.remove();
-			}
+		public void ClearValues() {
+		    foreach (var valueElement in element.Elements("value").ToList())
+		    {
+		        valueElement.Remove();
+		    }
 		}
 
 		/**
@@ -67,14 +70,14 @@ namespace org.xmpp.forms
      * @param label a label that represents the option. Optional argument.
      * @param value the value of the option.
      */
-		public void addOption(String label, String value) {
-			if (value == null || value.trim().length() == 0) {
+		public void AddOption(String label, String value) {
+			if (value == null || value.Trim().Length == 0) {
 				return;
 			}
 
-			Element option = element.addElement("option");
-			option.addAttribute("label", label);
-			option.addElement("value").setText(value);
+			element.Add(new XElement("option",
+                new XAttribute("label", label),
+                new XElement("value", value)));
 		}
 
 		/**
@@ -83,11 +86,12 @@ namespace org.xmpp.forms
      *
      * @return the available options to answer for this question.
      */
-		public List<Option> getOptions() {
-			List<Option> answer = new ArrayList<Option>();
-			for (Iterator<Element> it = element.elementIterator("option"); it.hasNext();) {
-				answer.add(new Option(it.next()));
-			}
+		public List<Option> GetOptions() {
+			var answer = new List<Option>();
+		    foreach (var optionElement in element.Elements("option"))
+		    {
+		        answer.Add(new Option(optionElement));
+		    }
 			return answer;
 		}
 
@@ -112,8 +116,8 @@ namespace org.xmpp.forms
      *
      * @param type an indicative of the format for the data to answer.
      */
-		public void setType(Type type) {
-			element.addAttribute("type", type==null?null:type.toXMPP());
+		public void SetType(Type? type) {
+			element.Add(new XAttribute("type", type==null?null:type.toXMPP()));
 		}
 
 		/**
@@ -122,8 +126,8 @@ namespace org.xmpp.forms
      *
      * @param var the unique identifier of the field in the context of the form.
      */
-		public void setVariable(String var) {
-			element.addAttribute("var", var);
+		public void SetVariable(string var) {
+			element.Add(new XAttribute("var", var));
 		}
 
 		/**
@@ -132,8 +136,8 @@ namespace org.xmpp.forms
      *
      * @param label the label of the question.
      */
-		public void setLabel(String label) {
-			element.addAttribute("label", label);
+		public void SetLabel(string label) {
+			element.Add(new XAttribute("label", label));
 		}
 
 		/**
@@ -141,13 +145,17 @@ namespace org.xmpp.forms
      *
      * @param required if the question must be answered in order to complete the questionnaire.
      */
-		public void setRequired(bool required) {
+		public void SetRequired(bool required) {
 			// Remove an existing desc element.
-			if (element.element("required") != null) {
-				element.remove(element.element("required"));
-			}
-			if (required) {
-				element.addElement("required");
+		    var requiredElement = element.Element("required");
+		    if (requiredElement != null)
+		    {
+		        requiredElement.Remove();
+		    }
+
+			if (required)
+			{
+			    element.Add(new XElement("required"));
 			}
 		}
 
@@ -163,17 +171,18 @@ namespace org.xmpp.forms
      * 
      * @param description provides extra clarification about the question.
      */
-		public void setDescription(String description) {
+		public void SetDescription(string description) {
 			// Remove an existing desc element.
-			if (element.element("desc") != null) {
-				element.remove(element.element("desc"));
+		    var descElement = element.Element("desc");
+			if (descElement != null) {
+				descElement.Remove();
 			}
 
-			if (description == null || description.trim().length() == 0) {
+			if (string.IsNullOrEmpty(description)) {
 				return;
 			}
 
-			element.addElement("desc").setText(description);
+			element.Add(new XElement("desc", description));
 		}
 
 		/**
@@ -181,8 +190,8 @@ namespace org.xmpp.forms
      *
      * @return true if the question must be answered in order to complete the questionnaire.
      */
-		public bool isRequired() {
-			return element.element("required") != null;
+		public bool IsRequired() {
+			return element.Element("required") != null;
 		}
 
 		/**
@@ -190,8 +199,8 @@ namespace org.xmpp.forms
      *
      * @return the variable name of the question.
      */
-		public String getVariable() {
-			return element.attributeValue("var");
+		public String GetVariable() {
+			return element.Attribute("var").Value;
 		}
 
 		/**
@@ -201,11 +210,12 @@ namespace org.xmpp.forms
      *
      * @return an Iterator for the default values or answered values of the question.
      */
-		public List<String> getValues() {
-			List<String> answer = new ArrayList<String>();
-			for (Iterator<Element> it = element.elementIterator("value"); it.hasNext();) {
-				answer.add(it.next().getTextTrim());
-			}
+		public List<string> GetValues() {
+			var answer = new List<String>();
+		    foreach (var valueElement in element.Elements("value"))
+		    {
+		        answer.Add(valueElement.Value);
+		    }
 			return answer;
 		}
 
@@ -217,13 +227,12 @@ namespace org.xmpp.forms
 	 *            The field from which to return the first value.
 	 * @return String based value, or 'null' if the FormField has no values.
 	 */
-		public String getFirstValue()
+		public string GetFirstValue()
 		{
-			for (Iterator<Element> it = element.elementIterator("value"); it.hasNext();) {
-				return it.next().getTextTrim();
-			}
-
-			return null;
+		    var valueElement = element.Elements("value").FirstOrDefault();
+		    if (valueElement != null)
+		        return valueElement.Value;
+		    return null;
 		}
 
 		/**
@@ -247,10 +256,11 @@ namespace org.xmpp.forms
      *
      * @return format for the data to answer.
      */
-		public Type getType() {
-			String type = element.attributeValue("type");
-			if (type != null) {
-				return Type.fromXMPP(type);
+		public Type? GetType()
+		{
+		    var typeAttribute = element.Attribute("type");
+			if (typeAttribute != null) {
+				return Type.fromXMPP(typeAttribute.Value);
 			}
 			return null;
 		}
@@ -261,8 +271,8 @@ namespace org.xmpp.forms
      *
      * @return label of the question.
      */
-		public String getLabel() {
-			return element.attributeValue("label");
+		public string GetLabel() {
+			return element.Attribute("label").Value;
 		}
 
 		/**
@@ -274,8 +284,10 @@ namespace org.xmpp.forms
      *
      * @return description that provides extra clarification about the question.
      */
-		public String getDescription() {
-			return element.elementTextTrim("desc");
+		public String GetDescription()
+		{
+		    var descElement = element.Element("desc");
+		    return descElement != null ? descElement.Value.Trim() : "";
 		}
 
 		/**
@@ -283,7 +295,7 @@ namespace org.xmpp.forms
      * 
      * @return an exact copy of this instance.
      */
-		public FormField createCopy() {
+		public FormField CreateCopy() {
 			return new FormField(this.element.createCopy());
 		}
 
@@ -292,10 +304,10 @@ namespace org.xmpp.forms
      *
      * @author Gaston Dombiak
      */
-		public static class Option {
-			private Element element;
+		public class Option {
+			private XElement element;
 
-			private Option(Element element) {
+			public Option(XElement element) {
 				this.element = element;
 			}
 
@@ -304,8 +316,8 @@ namespace org.xmpp.forms
          *
          * @return the label that represents the option.
          */
-			public String getLabel() {
-				return element.attributeValue("label");
+			public string GetLabel() {
+				return element.Attribute("label").Value;
 			}
 
 			/**
@@ -313,8 +325,10 @@ namespace org.xmpp.forms
          *
          * @return the value of the option.
          */
-			public String getValue() {
-				return element.elementTextTrim("value");
+			public String GetValue()
+			{
+			    var valueElement = element.Element("value");
+			    return valueElement != null ? valueElement.Value.Trim() : "";
 			}
 		}
 
@@ -397,7 +411,7 @@ namespace org.xmpp.forms
          * assumed if an entity receives a field type it does not understand.
          */
 			[Description("text-single")]
-			text_single
+			text_single,
 
 			/**
          * Converts a String value into its Type representation.

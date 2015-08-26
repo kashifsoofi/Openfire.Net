@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Xml.Linq;
 
@@ -90,7 +91,7 @@ namespace org.xmpp.packet
      *
      * @param element the error Element.
      */
-		public PacketError(Element element) {
+		public PacketError(XElement element) {
 			this.element = element;
 		}
 
@@ -318,7 +319,7 @@ namespace org.xmpp.packet
      */
 		public String getApplicationConditionNamespaceURI() {
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
-				Element el = i.next();
+				XElement el = i.next();
 				if (!el.getNamespaceURI().equals(ERROR_NAMESPACE))
 				{
 					return el.getNamespaceURI();
@@ -334,11 +335,12 @@ namespace org.xmpp.packet
      *
      * @return the DOM4J Element.
      */
-		public XElement getElement() {
-			return element;
-		}
+	    public XElement GetElement()
+	    {
+	        return element;
+	    }
 
-		/**
+	    /**
      * Returns the textual XML representation of this error.
      *
      * @return the textual XML representation of this error.
@@ -350,7 +352,7 @@ namespace org.xmpp.packet
 		public override string ToString()
 		{
 			StringWriter @out = new StringWriter();
-			XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
+			XMLWriter writer = new XMLWriter(@out, OutputFormat.createPrettyPrint());
 			try {
 				writer.write(element);
 			}
@@ -377,6 +379,7 @@ namespace org.xmpp.packet
          * (e.g., an IQ stanza that includes an unrecognized value of the 'type'
          * attribute); the associated error type SHOULD be "modify".
          */
+            [Description]
 			bad_request("bad-request", Type.modify, 400),
 
 			/**
@@ -384,6 +387,7 @@ namespace org.xmpp.packet
          * exists with the same name or address; the associated error type
          * SHOULD be "cancel".
          */
+            [Description]
 			conflict("conflict", Type.cancel, 409),
 
 			/**
@@ -391,12 +395,14 @@ namespace org.xmpp.packet
          * server and therefore cannot be processed; the associated error
          * type SHOULD be "cancel".
          */
+            [Description]
 			feature_not_implemented("feature-not-implemented", Type.cancel, 501),
 
 			/**
          * The requesting entity does not possess the required permissions to
          * perform the action; the associated error type SHOULD be "auth".
          */
+            [Description]
 			forbidden("forbidden", Type.auth, 403),
 
 			/**
@@ -405,6 +411,7 @@ namespace org.xmpp.packet
          * data of the <gone/> element); the associated error type SHOULD be
          * "modify".
          */
+            [Description]
 			gone("gone", Type.modify, 302),
 
 			/**
@@ -412,12 +419,14 @@ namespace org.xmpp.packet
          * or an otherwise-undefined internal server error; the associated error
          * type SHOULD be "wait".
          */
+            [Description]
 			internal_server_error("internal-server-error", Type.wait, 500),
 
 			/**
          * The addressed JID or item requested cannot be found; the associated
          * error type SHOULD be "cancel".
          */
+            [Description]
 			item_not_found("item-not-found", Type.cancel, 404),
 
 			/**
@@ -427,6 +436,7 @@ namespace org.xmpp.packet
          * in Addressing Scheme (Section 3); the associated error type SHOULD
          * be "modify".
          */
+            [Description]
 			jid_malformed("jid-malformed", Type.modify, 400),
 
 			/**
@@ -435,12 +445,14 @@ namespace org.xmpp.packet
          * recipient or server (e.g., a local policy regarding acceptable
          * words in messages); the associated error type SHOULD be "modify".
          */
+            [Description]
 			not_acceptable("not-acceptable", Type.modify, 406),
 
 			/**
          * The recipient or server does not allow any entity to perform
          * the action; the associated error type SHOULD be "cancel".
          */
+            [Description]
 			not_allowed("not-allowed", Type.cancel, 405),
 
 			/**
@@ -448,6 +460,7 @@ namespace org.xmpp.packet
          * to perform the action, or has provided improper credentials;
          * the associated error type SHOULD be "auth".
          */
+            [Description]
 			not_authorized("not-authorized", Type.auth, 401),
 
 			/**
@@ -455,6 +468,7 @@ namespace org.xmpp.packet
          * service because payment is required; the associated error type
          * SHOULD be "auth".
          */
+            [Description]
 			payment_required("payment-required", Type.auth, 402),
 
 			/**
@@ -464,6 +478,7 @@ namespace org.xmpp.packet
          * recipient's network availability to an entity that is not authorized
          * to know such information).
          */
+            [Description]
 			recipient_unavailable("recipient-unavailable", Type.wait, 404),
 
 			/**
@@ -473,6 +488,7 @@ namespace org.xmpp.packet
          * valid JID, in the XML character data of the &lt;redirect/&gt; element);
          * the associated error type SHOULD be "modify".
          */
+            [Description]
 			redirect("redirect", Type.modify, 302),
 
 			/**
@@ -480,6 +496,7 @@ namespace org.xmpp.packet
          * service because registration is required; the associated error
          * type SHOULD be "auth".
          */
+            [Description]
 			registration_required("registration-required", Type.auth, 407),
 
 			/**
@@ -487,6 +504,7 @@ namespace org.xmpp.packet
          * of the intended recipient does not exist; the associated error
          * type SHOULD be "cancel".
          */
+            [Description]
 			remote_server_not_found("remote-server-not-found", Type.cancel, 404),
 
 			/**
@@ -495,18 +513,21 @@ namespace org.xmpp.packet
          * be contacted within a reasonable amount of time; the associated
          * error type SHOULD be "wait".
          */
+            [Description]
 			remote_server_timeout("remote-server-timeout", Type.wait, 504),
 
 			/**
          * The server or recipient lacks the system resources necessary to
          * service the request; the associated error type SHOULD be "wait".
          */
+            [Description]
 			resource_constraint("resource-constraint", Type.wait, 500),
 
 			/**
          * The server or recipient does not currently provide the requested
          * service; the associated error type SHOULD be "cancel".
          */
+            [Description]
 			service_unavailable("service-unavailable", Type.cancel, 503),
 
 			/**
@@ -514,6 +535,7 @@ namespace org.xmpp.packet
          * service because a subscription is required; the associated error
          * type SHOULD be "auth".
          */
+            [Description]
 			subscription_required("subscription-required", Type.auth, 407),
 
 			/**
@@ -525,6 +547,7 @@ namespace org.xmpp.packet
          * Implementation note: the default type for this condition is
          * {@link Type#wait}, which is not specified in the XMPP protocol.
          */
+            [Description]
 			undefined_condition("undefined-condition", Type.wait, 500),
 
 			/**
@@ -532,7 +555,8 @@ namespace org.xmpp.packet
          * expecting it at this time (e.g., the request was out of order);
          * the associated error type SHOULD be "wait".
          */
-			unexpected_request("unexpected-request", Type.wait, 400);
+            [Description]
+			unexpected_request("unexpected-request", Type.wait, 400),
 
 			/**
          * Converts a String value into its Condition representation.
@@ -754,29 +778,34 @@ namespace org.xmpp.packet
 			/**
          * Do not retry (the error is unrecoverable).
          */
-			cancel("cancel"),
+            [Description("cancel")]
+			cancel,
 
 			/**
          * Proceed (the condition was only a warning). This represents
          * the "continue" error code in XMPP; because "continue" is a
          * reserved keyword in Java the enum name has been changed.
          */
-			continue_processing("continue"),
+            [Description("continue")]
+			continue_processing,
 
 			/**
          * Retry after changing the data sent.
          */
-			modify("modify"),
+            [Description("modify")]
+			modify,
 
 			/**
          * Retry after providing credentials.
          */
-			auth("auth"),
+            [Description("auth")]
+			auth,
 
 			/**
          * Retry after waiting (the error is temporary).
          */
-			wait("wait");
+            [Description("wait")]
+			wait,
 
 			/**
          * Converts a String value into its Type representation.
@@ -805,7 +834,7 @@ namespace org.xmpp.packet
 					return wait;
 				}
 				else {
-					throw new IllegalArgumentException("Type invalid:" + type);
+					throw new ArgumentException("Type invalid:" + type);
 				}
 			}
 

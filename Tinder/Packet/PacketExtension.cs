@@ -52,7 +52,7 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return the extension class to use for the specified element name and namespace.
      */
-		public static Type getExtensionClass(String name, String @namespace) {
+		public static Type GetExtensionClass(String name, String @namespace) {
 			return registeredExtensions[XName.Get(name, @namespace)];
 		}
 

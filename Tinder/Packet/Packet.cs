@@ -11,6 +11,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -79,7 +83,7 @@ namespace org.xmpp.packet
 				else {
 					string[] parts = JID.getParts(to);
 					toJID = new JID(parts[0], parts[1], parts[2], skipValidation);
-					element.SetAttributeValue("to", toJID.toString());
+					element.SetAttributeValue("to", toJID.ToString());
 				}
 			}
 			string from = element.Attribute("from").Value;
@@ -91,7 +95,7 @@ namespace org.xmpp.packet
 				else {
 					string[] parts = JID.getParts(from);
 					fromJID = new JID(parts[0], parts[1], parts[2], true);
-					element.SetAttributeValue("from", fromJID.toString());
+					element.SetAttributeValue("from", fromJID.ToString());
 				}
 			}
 		}
@@ -137,7 +141,7 @@ namespace org.xmpp.packet
 				return null;
 			}
 			else {
-				if (toJID != null && to.Equals(toJID.toString())) {
+				if (toJID != null && to.Equals(toJID.ToString())) {
 					return toJID;
 				}
 				else {
@@ -272,21 +276,25 @@ namespace org.xmpp.packet
      */
 		public PacketExtension getExtension(string name, string @namespace) {
 			List<XElement> extensions = element.Elements(XName.Get(name, @namespace)).ToList();
-			if (!extensions.isEmpty()) {
-				Class<? extends PacketExtension> extensionClass = PacketExtension.getExtensionClass(name, @namespace);
+			if (extensions.Any()) {
+				//Class<? extends PacketExtension> extensionClass = PacketExtension.GetExtensionClass(name, @namespace);
+                Type extensionClass = PacketExtension.GetExtensionClass(name, @namespace);
 				// If a specific PacketExtension implementation has been registered, use that.
 				if (extensionClass != null) {
-					try {
-						Constructor<? extends PacketExtension> constructor = extensionClass.getDeclaredConstructor(XElement.class);
-						return constructor.newInstance(extensions.get(0));
+					try
+					{
+					    ConstructorInfo constructor = extensionClass.GetConstructors()
+					        .First(
+					            x => x.GetParameters().Count() == 1 && x.GetParameters().All(a => a.ParameterType == typeof (XElement)));
+					    return constructor.Invoke(new [] { extensions[0] }) as PacketExtension;
 					}
 					catch (Exception e) {
-						Log.warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
+						log.Warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
 					}
 				}
 				// Otherwise, use a normal PacketExtension.
 				else {
-					return new PacketExtension(extensions.get(0));
+					return new PacketExtension(extensions[0]);
 				}
 			}
 			return null;
@@ -305,22 +313,28 @@ namespace org.xmpp.packet
      * @param namespace the child element namespace.
      * @return true if a child element was removed.
      */
-		public bool deleteExtension(string name, string @namespace) {
-			List<XElement> extensions = element.Elements(XName.Get(name, @namespace)).ToList();
-			if (!extensions.isEmpty()) {
-				element.remove(extensions.get(0));
-				return true;
-			}
-			return false;
-		}
 
-		/**
+	    public bool deleteExtension(string name, string @namespace)
+	    {
+	        List<XElement> extensions = element.Elements(XName.Get(name, @namespace)).ToList();
+	        if (extensions.Any())
+	        {
+	            foreach (var extension in extensions)
+	            {
+	                extension.Remove();
+	            }
+	            return true;
+	        }
+	        return false;
+	    }
+
+	    /**
      * Returns the packet error, or <tt>null</tt> if there is no packet error.
      *
      * @return the packet error.
      */
-		public PacketError getError() {
-			Element error = element.element("error");
+		public PacketError GetError() {
+			XElement error = element.Element("error");
 			if (error != null) {
 				return new PacketError(error);
 			}
@@ -333,18 +347,19 @@ namespace org.xmpp.packet
      *
      * @param error the packet error.
      */
-		public void setError(PacketError error) {
+		public void SetError(PacketError error) {
 			if (element == null) {
-				throw new NullPointerException("Error cannot be null");
+				throw new NullReferenceException("Error cannot be null");
 			}
 			// Force the packet type to "error".
-			element.addAttribute("type", "error");
+			element.Add(new XAttribute("type", "error"));
 			// Remove an existing error packet.
-			if (element.element("error") != null) {
-				element.remove(element.element("error"));
+			if (element.Element("error") != null)
+			{
+			    element.Element("error").Remove();
 			}
 			// Add the error element.
-			element.add(error.getElement());
+			element.Add(error.GetElement());
 		}
 
 		/**
@@ -356,8 +371,8 @@ namespace org.xmpp.packet
      *
      * @param condition the error condition.
      */
-		public void setError(PacketError.Condition condition) {
-			setError(new PacketError(condition));
+		public void SetError(PacketError.Condition condition) {
+			SetError(new PacketError(condition));
 		}
 
 		/**
@@ -365,7 +380,7 @@ namespace org.xmpp.packet
      *
      * @return a deep copy of this packet.
      */
-		public abstract Packet createCopy();
+		public abstract Packet CreateCopy();
 
 		/**
      * Returns the DOM4J Element that backs the packet. The element is the definitive
@@ -374,7 +389,7 @@ namespace org.xmpp.packet
      *
      * @return the DOM4J Element that represents the packet.
      */
-		public Element getElement() {
+		public XElement GetElement() {
 			return element;
 		}
 
@@ -383,20 +398,20 @@ namespace org.xmpp.packet
      *
      * @return the textual XML representation of this packet.
      */
-		public String toXML() {
+		public string toXML() {
 			return element.asXML();
 		}
 
-		public String toString() {
-			StringWriter out = new StringWriter();
-			XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
+		public string ToString() {
+			StringWriter @out = new StringWriter();
+			XMLWriter writer = new XMLWriter(@out, OutputFormat.createPrettyPrint());
 			try {
 				writer.write(element);
 			}
 			catch (Exception e) {
 				// Ignore.
 			}
-			return out.toString();
+			return @out.ToString();
 		}
 	}
 }

@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using NLog;
 
@@ -297,16 +298,16 @@ namespace org.xmpp.packet
 			// Search for extensions in the child element
 		    List<XElement> extensions = childElement.Elements(XName.Get(name, @namespace)).ToList();
 			if (!extensions.Any()) {
-				Type extensionClass = PacketExtension.getExtensionClass(name, @namespace);
+				System.Type extensionClass = PacketExtension.GetExtensionClass(name, @namespace);
 				if (extensionClass != null) {
 					try {
-						Constructor<? extends PacketExtension> constructor = extensionClass.getDeclaredConstructor(new Class[]{
-							Element.class});
-						return constructor.newInstance(new Object[]{
-							extensions.get(0)});
+					    ConstructorInfo constructor = extensionClass.GetConstructors()
+					        .First(
+					            x => x.GetParameters().Count() == 1 && x.GetParameters().All(a => a.ParameterType == typeof (XElement)));
+					    return constructor.Invoke(new [] { extensions[0] }) as PacketExtension;
 					}
 					catch (Exception e) {
-						Log.Warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
+						log.Warn("Packet extension (name "+name+", namespace "+@namespace+") cannot be found.", e);
 					}
 				}
 			}

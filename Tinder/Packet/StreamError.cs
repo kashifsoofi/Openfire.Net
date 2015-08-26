@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 using System;
+using System.ComponentModel;
+using System.IO;
 using System.Xml.Linq;
 
 namespace org.xmpp.packet
@@ -38,7 +40,7 @@ namespace org.xmpp.packet
 		public StreamError(Condition condition) {
 			this.element = docFactory.createElement(docFactory.createQName("error", "stream",
 			                                                           "http://etherx.jabber.org/streams"));
-            new XNamespace()
+		    //new XNamespace()
 			setCondition(condition);
 		}
 
@@ -85,9 +87,9 @@ namespace org.xmpp.packet
      * @return the error condition.
      * @see Condition
      */
-		public Condition getCondition() {
-			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
-				Element el = i.next();
+		public Condition GetCondition() {
+			for (Iterator<XElement> i=element.elementIterator(); i.hasNext(); ) {
+				XElement el = i.next();
 				if (el.getNamespaceURI().equals(ERROR_NAMESPACE) &&
 				!el.getName().equals("text"))
 				{
@@ -107,9 +109,9 @@ namespace org.xmpp.packet
 			if (condition == null) {
 				throw new ArgumentException("Condition cannot be null");
 			}
-			Element conditionElement = null;
+			XElement conditionElement = null;
 			for (Iterator<Element> i=element.elementIterator(); i.hasNext(); ) {
-				Element el = i.next();
+				XElement el = i.next();
 				if (el.getNamespaceURI().equals(ERROR_NAMESPACE) &&
 				!el.getName().equals("text"))
 				{
@@ -117,11 +119,11 @@ namespace org.xmpp.packet
 				}
 			}
 			if (conditionElement != null) {
-				element.remove(conditionElement);
+				conditionElement.Remove();
 			}
 
 			conditionElement = docFactory.createElement(condition.toXMPP(), ERROR_NAMESPACE);
-			element.add(conditionElement);
+			element.Add(conditionElement);
 		}
 
 		/**
@@ -130,8 +132,9 @@ namespace org.xmpp.packet
      *
      * @return the text description of the error.
      */
-		public String getText() {
-			return element.elementText("text");
+		public String GetText()
+		{
+		    return element.Element("text").Value;
 		}
 
 		/**
@@ -179,9 +182,10 @@ namespace org.xmpp.packet
      */
 		public String getTextLanguage() {
 			XElement textElement = element.Element("text");
-			if (textElement != null) {
-				return textElement.attributeValue(XName.Get("lang", "xml",
-				                                        "http://www.w3.org/XML/1998/namespace"));
+			if (textElement != null)
+			{
+			    return textElement.Attribute(XName.Get("lang", "xml",
+			        "http://www.w3.org/XML/1998/namespace")).Value;
 			}
 			return null;
 		}
@@ -207,13 +211,13 @@ namespace org.xmpp.packet
 		}
 
 		public String toString() {
-			StringWriter out = new StringWriter();
-			XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
+			StringWriter @out = new StringWriter();
+			XMLWriter writer = new XMLWriter(@out, OutputFormat.createPrettyPrint());
 			try {
 				writer.write(element);
 			}
 			catch (Exception e) { e.printStackTrace(); }
-			return out.toString();
+			return @out.ToString();
 		}
 
 		/**
@@ -234,72 +238,84 @@ namespace org.xmpp.packet
          * &lt;invalid-xml/&gt;, &lt;restricted-xml/&gt;, &lt;unsupported-encoding/&gt;, and
          * &lt;xml-not-well-formed/&gt;, although the more specific errors are preferred.
          */
-			bad_format("bad-format"),
+            [Description("bad-format")]
+			bad_format,
 
 			/**
          * The entity has sent a namespace prefix that is unsupported, or has sent no
          * namespace prefix on an element that requires such a prefix.
          */
-			bad_namespace_prefix("bad-namespace-prefix"),
+            [Description("bad-namespace-prefix")]
+			bad_namespace_prefix,
 
 			/**
          * The server is closing the active stream for this entity because a new stream
          * has been initiated that conflicts with the existing stream.
          */
-			conflict("conflict"),
+        [Description("conflict")]
+			conflict,
 
 			/**
          * The entity has not generated any traffic over the stream for some period of
          * time (configurable according to a local service policy).
          */
-			connection_timeout("connection-timeout"),
+        [Description("connection-timeout")]
+			connection_timeout,
 
 			/**
          * The value of the 'to' attribute provided by the initiating entity in the
          * stream header corresponds to a hostname that is no longer hosted by the server.
          */
-			host_gone("host-gone"),
+        [Description("host-gone")]
+			host_gone,
 
 			/**
          * The value of the 'to' attribute provided by the initiating entity in the
          * stream header does not correspond to a hostname that is hosted by the server.
          */
-			host_unknown("host-unknown"),
+        [Description("host-unknown")]
+			host_unknown,
 
 			/**
          * A stanza sent between two servers lacks a 'to' or 'from' attribute
          * (or the attribute has no value).
          */
-			improper_addressing("improper-addressing"),
+        [Description("improper-addressing")]
+			improper_addressing,
 
 			/**
          * The server has experienced a misconfiguration or an otherwise-undefined
          * internal error that prevents it from servicing the stream.
          */
-			internal_server_error("internal-server-error"),
+        [Description("internal-server-error")]
+			internal_server_error,
 
 			/**
          * The JID or hostname provided in a 'from' address does not match an authorized
          * JID or validated domain negotiated between servers via SASL or dialback, or
          * between a client and a server via authentication and resource binding.
          */
-			invalid_from("invalid-from"),
+        [Description("invalid-from")]
+			invalid_from,
 
 			/**
          * The stream ID or dialback ID is invalid or does not match an ID previously provided.
          */
-			invalid_id("invalid-id"),
+        [Description("invalid-id")]
+			invalid_id,
 
 			/**
          * the streams namespace name is something other than "http://etherx.jabber.org/streams"
          * or the dialback namespace name is something other than "jabber:server:dialback".
          */
-			invalid_namespace("invalid-namespace"),
+        [Description("invalid-namespace")]
+			invalid_namespace,
 
 			/**
          * The entity has sent invalid XML over the stream to a server that performs validation.
          */
-			invalid_xml("invalid-xml"),
+        [Description("invalid-xml")]
+			invalid_xml,
 
 			/**
          * The entity has attempted to send data before the stream has been authenticated,
@@ -307,31 +323,36 @@ namespace org.xmpp.packet
          * negotiation; the receiving entity MUST NOT process the offending stanza before
          * sending the stream error.
          */
-			not_authorized("not-authorized"),
+        [Description("not-authorized")]
+			not_authorized,
 
 			/**
          * The entity has violated some local service policy; the server MAY choose to
          * specify the policy in the <text/> element or an application-specific condition
          * element.
          */
-			policy_violation("policy-violation"),
+        [Description("policy-violation")]
+			policy_violation,
 
 			/**
          * The server is unable to properly connect to a remote entity that is required for
          * authentication or authorization.
          */
-			remote_connection_failed("remote-connection-failed"),
+        [Description("remote-connection-failed")]
+			remote_connection_failed,
 
 			/**
          * The server lacks the system resources necessary to service the stream.
          */
-			resource_constraint("resource-constraint"),
+        [Description("resource-constraint")]
+			resource_constraint,
 
 			/**
          * The entity has attempted to send restricted XML features such as a comment,
          * processing instruction, DTD, entity reference, or unescaped character.
          */
-			restricted_xml("restricted-xml"),
+        [Description("restricted-xml")]
+			restricted_xml,
 
 			/**
          * The server will not provide service to the initiating entity but is redirecting
@@ -339,43 +360,50 @@ namespace org.xmpp.packet
          * address (which MUST be a valid domain identifier) as the XML character data of the
          * &lt;see-other-host/&gt; element.
          */
-			see_other_host("see-other-host"),
+        [Description("see-other-host")]
+			see_other_host,
 
 			/**
          * The server is being shut down and all active streams are being closed.
          */
-			system_shutdown("system-shutdown"),
+        [Description("system-shutdown")]
+			system_shutdown,
 
 			/**
          * The error condition is not one of those defined by the other conditions in this
          * list; this error condition SHOULD be used only in conjunction with an
          * application-specific condition.
          */
-			undefined_condition("undefined-condition"),
+        [Description("undefined-condition")]
+			undefined_condition,
 
 			/**
          * The initiating entity has encoded the stream in an encoding that is not
          * supported by the server.
          */
-			unsupported_encoding("unsupported-encoding"),
+        [Description("unsupported-encoding")]
+			unsupported_encoding,
 
 			/**
          * The initiating entity has sent a first-level child of the stream that is
          * not supported by the server.
          */
-			unsupported_stanza_type("unsupported-stanza-type"),
+        [Description("unsupported-stanza-type")]
+			unsupported_stanza_type,
 
 			/**
          * the value of the 'version' attribute provided by the initiating entity in the
          * stream header specifies a version of XMPP that is not supported by the server;
          * the server MAY specify the version(s) it supports in the &lt;text/&gt; element.
          */
-			unsupported_version("unsupported-version"),
+        [Description("unsupported-version")]
+			unsupported_version,
 
 			/**
          * The initiating entity has sent XML that is not well-formed.
          */
-			xml_not_well_formed("xml-not-well-formed");
+        [Description("xml-not-well-formed")]
+			xml_not_well_formed,
 
 			/**
          * Converts a String value into its Condition representation.
